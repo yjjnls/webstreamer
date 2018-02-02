@@ -4,7 +4,8 @@
   "description": "WebStreamer",
   "main": "index.js",
   "scripts": {
-    "basic-test": "./node_modules/.bin/mocha test/basic"
+    "basic-test": "./node_modules/.bin/mocha test/basic",
+    "livestream-test": "./node_modules/.bin/mocha test/livestream"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,6 @@
     "mocha": "^5.0.0"
   },
   "dependencies": {
-    "node-plugin": "latest"
+    "node-plugin": "^0.2.1"
   }
 }

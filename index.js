@@ -5,6 +5,7 @@ var EventEmitter = new events.EventEmitter();
 
 class WebStreamer extends EventEmitter {
     constructor( name ) {
+    	super();
 		this.name = name;
 		this.plugin_ = new Plugin(name)		
     }
@@ -21,7 +22,7 @@ class WebStreamer extends EventEmitter {
 		this.plugin_.release(done);
 	}
 
-	call_(buf,cb){
+	call_(buf){
 		this.plugin_.call(buf,cb);
 	}
 
@@ -32,7 +33,7 @@ class WebStreamer extends EventEmitter {
 //example = path.join(__dirname,'/bin/calc'+_EXT)
 module.exports = {
 	WebStreamer  : WebStreamer
-}
+};
 
 
 
