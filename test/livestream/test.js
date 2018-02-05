@@ -35,7 +35,7 @@ describe('LiveStream flatbuf message tests', function () {
         it('Endpoint type should return 0', function () {
             assert.equal(livestreamcreate.endpoint().rtspclient().base().type(), 0);
         });
-        it('Endpoint url should return “rtsp://172.16.66.66/id=1”', function () {
+        it(`Endpoint url should return ${rtspurl}`, function () {
             assert.equal(livestreamcreate.endpoint().rtspclient().url(), rtspurl);
         });
     });
@@ -53,6 +53,46 @@ describe('LiveStream flatbuf message tests', function () {
         it('id should return 1', function () {
             assert.equal(livestreamdestroy.id(), 1);
         })
+    });
+
+    describe('#LiveStreamAddEndpoint', function () {
+        let buf,
+            streamId = 1,
+            endpointId = 2;
+        let livestreamaddendpoint;
+
+        beforeEach(function () {
+            buf = liveStream.generateLiveStreamAddEndpointMsgBuf(streamId, endpointId);
+            livestreamaddendpoint = Webstreamer.LiveStreamAddEndpoint.getRootAsLiveStreamAddEndpoint(buf);
+        });
+
+        it('stream id should return 1', function () {
+            assert.equal(livestreamaddendpoint.id(), 1);
+        });
+
+        it('endpoint id should return 2', function () {
+            assert.equal(livestreamaddendpoint.endpoint().rtspclient().base().id(), 2);
+        });
+    });
+
+    describe('#LiveStreamRemoveEndpoint', function () {
+        let buf,
+            streamId = 1,
+            endpointId = 2;
+        let livestreamremoveendpoint;
+
+        beforeEach(function () {
+           buf = liveStream.generateLiveStreamRemoveEndpointMsgBuf(streamId, endpointId);
+           livestreamremoveendpoint = Webstreamer.LiveStreamRemoveEndpoint.getRootAsLiveStreamRemoveEndpoint(buf);
+        });
+
+        it('stream id should return 1', function () {
+            assert.equal(livestreamremoveendpoint.id(), 1);
+        });
+
+        it('endpoint id should return 2', function () {
+            assert.equal(livestreamremoveendpoint.endpointId(), 2);
+        });
     })
 });
 
