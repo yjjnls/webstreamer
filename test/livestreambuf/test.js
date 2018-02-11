@@ -5,7 +5,7 @@
 const chai = require('chai');
 let expect = chai.expect,
     assert = chai.assert;
-const liveStream = require('../../lib/livestream');
+const liveStream = require('../../lib/livestreambuf');
 const Webstreamer = require('../../schema/webstreamer_generated').webstreamer;
 
 describe('LiveStream flatbuf message tests', function () {

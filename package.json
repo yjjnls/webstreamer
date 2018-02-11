@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "basic-test": "./node_modules/.bin/mocha test/basic",
-    "livestream-test": "./node_modules/.bin/mocha test/livestream"
+    "livestreambuf-test": "./node_modules/.bin/mocha test/livestreambuf"
   },
   "repository": {
     "type": "git",

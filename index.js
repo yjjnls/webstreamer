@@ -26,16 +26,19 @@ class LiveStreamWebStreamer {
 	async callLiveStreamDestroy(streamId) {
 		let buf = liveStreamBufGenerator.generateLiveStreamDestroyMsgBuf(streamId);
 		let res = await this._webstreamer.call_(buf);
+		return res;
 	}
 
 	async callLiveStreamAddEndpoint(streamId, endpointId) {
 		let buf = liveStreamBufGenerator.generateLiveStreamAddEndpointMsgBuf(streamId, endpointId);
 		let res = await this._webstreamer.call_(buf);
+		return res;
 	}
 
 	async callLiveStreamRemoveEndpoint(streamId, endpointId) {
 		let buf = liveStreamBufGenerator.generateLiveStreamRemoveEndpointMsgBuf(streamId, endpointId);
 		let res = await this._webstreamer.call_(buf);
+		return res;
 	}
  }
 
