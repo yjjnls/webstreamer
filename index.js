@@ -1,38 +1,53 @@
-const Plugin = require('node-plugin').Plugin
-const process = require('process')
-var events = require('events');
-var EventEmitter = new events.EventEmitter();
+const liveStreamBufGenerator = require('./lib/livestream');
+const WebStreamer = require('./lib/webstreamer');
 
-class WebStreamer extends EventEmitter {
-    constructor( name ) {
-		this.name = name;
-		this.plugin_ = new Plugin(name)		
-    }
+class LiveStreamWebStreamer {
+	constructor(libname) {
+		this._webstreamer = new WebStreamer(libname);
+        let options = {
+            plugin: {
+                directory: __dirname + '/lib'
+            },
+            user: 'xxxxxx'
+        };
+        this._webstreamer.initialize(options);
 
-    initialize(options) {
-		this.plugin_.initialize(options,this.on_notify_);
 	}
 
-	on_notify_(buf){
-		console.log(buf.toString());
+    terminate(buf) {
+        return this._webstreamer.terminate();
 	}
 
-	terminate(done){
-		this.plugin_.release(done);
+	async callLiveStreamCreate(streamId, endpointId, endpointType, rtspurl, videoCodec, audioCodec) {
+		let buf = liveStreamBufGenerator.generateLiveStreamCreateMsgBuf(streamId, endpointId, endpointType, rtspurl, videoCodec, audioCodec);
+		let res = await this._webstreamer.call_(buf);
 	}
 
-	call_(buf,cb){
-		this.plugin_.call(buf,cb);
+	async callLiveStreamDestroy(streamId) {
+		let buf = liveStreamBufGenerator.generateLiveStreamDestroyMsgBuf(streamId);
+		let res = await this._webstreamer.call_(buf);
+		return res;
 	}
 
-}
+	async callLiveStreamAddEndpoint(streamId, endpointId) {
+		let buf = liveStreamBufGenerator.generateLiveStreamAddEndpointMsgBuf(streamId, endpointId);
+		let res = await this._webstreamer.call_(buf);
+		return res;
+	}
+
+	async callLiveStreamRemoveEndpoint(streamId, endpointId) {
+		let buf = liveStreamBufGenerator.generateLiveStreamRemoveEndpointMsgBuf(streamId, endpointId);
+		let res = await this._webstreamer.call_(buf);
+		return res;
+	}
+ }
 
 
 
 //example = path.join(__dirname,'/bin/calc'+_EXT)
 module.exports = {
-	WebStreamer  : WebStreamer
-}
+    LiveStreamWebStreamer,
+};
 
 
 
