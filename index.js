@@ -11,8 +11,6 @@ let options = {
 
 webstreamer.initialize(options);
 
-
-
 class LiveStream {
 	constructor() {
 	    if(!webstreamer) {
@@ -50,9 +48,6 @@ class LiveStream {
 	}
  }
 
-
-
-//example = path.join(__dirname,'/bin/calc'+_EXT)
 module.exports = {
-    LiveStream,
+    LiveStream: LiveStream,
 };
