@@ -1,7 +1,7 @@
-const liveStreamBufGenerator = require('./lib/livestream');
+const liveStreamBufGenerator = require('./lib/livestreambuf');
 const WebStreamer = require('./lib/webstreamer');
 
-let webstreamer = new WebStreamer(libname);
+let webstreamer = new WebStreamer('webstreamer');
 let options = {
     plugin: {
         directory: __dirname + '/lib'
@@ -10,6 +10,8 @@ let options = {
 };
 
 webstreamer.initialize(options);
+
+
 
 class LiveStream {
 	constructor() {
