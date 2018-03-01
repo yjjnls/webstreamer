@@ -1,55 +1,57 @@
-const liveStreamBufGenerator = require('./lib/livestream');
+const liveStreamBufGenerator = require('./lib/livestreambuf');
 const WebStreamer = require('./lib/webstreamer');
 
-class LiveStreamWebStreamer {
-	constructor(libname) {
-		this._webstreamer = new WebStreamer(libname);
-        let options = {
-            plugin: {
-                directory: __dirname + '/lib'
-            },
-            user: 'xxxxxx'
-        };
-        this._webstreamer.initialize(options);
+let webstreamer = new WebStreamer('webstreamer');
+let options = {
+    plugin: {
+        directory: __dirname + '/lib'
+    },
+    user: 'xxxxxx'
+};
 
+webstreamer.initialize(options);
+
+class LiveStream {
+	constructor() {
+	    if(!webstreamer) {
+            webstreamer = new WebStreamer(libname);
+            webstreamer.initialize(options);
+        }
 	}
 
     terminate(buf) {
-        return this._webstreamer.terminate();
+        webstreamer.terminate();
+        webstreamer = null;
 	}
 
-	async callLiveStreamCreate(streamId, endpointId, endpointType, rtspurl, videoCodec, audioCodec) {
+	async createLiveStream(streamId, endpointId, endpointType, rtspurl, videoCodec, audioCodec) {
+	    console.log(`=======createLiveStream=======`);
 		let buf = liveStreamBufGenerator.generateLiveStreamCreateMsgBuf(streamId, endpointId, endpointType, rtspurl, videoCodec, audioCodec);
-		let res = await this._webstreamer.call_(buf);
+		let res = await webstreamer.call_(buf);
 	}
 
-	async callLiveStreamDestroy(streamId) {
+	async destroyLiveStream(streamId) {
+        console.log(`=======destroyLiveStream=======`);
 		let buf = liveStreamBufGenerator.generateLiveStreamDestroyMsgBuf(streamId);
-		let res = await this._webstreamer.call_(buf);
+		let res = await webstreamer.call_(buf);
 		return res;
 	}
 
-	async callLiveStreamAddEndpoint(streamId, endpointId) {
+	async liveStreamAddEndpoint(streamId, endpointId) {
+        console.log(`=======liveStreamAddEndpoint=======`);
 		let buf = liveStreamBufGenerator.generateLiveStreamAddEndpointMsgBuf(streamId, endpointId);
-		let res = await this._webstreamer.call_(buf);
+		let res = await webstreamer.call_(buf);
 		return res;
 	}
 
-	async callLiveStreamRemoveEndpoint(streamId, endpointId) {
+	async liveStreamRemoveEndpoint(streamId, endpointId) {
+        console.log(`=======liveStreamRemoveEndpoint=======`);
 		let buf = liveStreamBufGenerator.generateLiveStreamRemoveEndpointMsgBuf(streamId, endpointId);
-		let res = await this._webstreamer.call_(buf);
+		let res = await webstreamer.call_(buf);
 		return res;
 	}
  }
 
-
-
-//example = path.join(__dirname,'/bin/calc'+_EXT)
 module.exports = {
-    LiveStreamWebStreamer,
+    LiveStream: LiveStream,
 };
-
-
-
-//const Plugin = require('node-plugin').Plugin
-

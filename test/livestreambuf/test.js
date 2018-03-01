@@ -1,98 +1,212 @@
 /**
- * Created by Ganchao on 2018/2/2.
+ * Created by Ganchao on 2018/3/1.
  */
 
 const chai = require('chai');
 let expect = chai.expect,
     assert = chai.assert;
-const liveStream = require('../../lib/livestreambuf');
-const Webstreamer = require('../../schema/webstreamer_generated').webstreamer;
 
-describe('LiveStream flatbuf message tests', function () {
-    describe('#LiveStreamCreate', function () {
+const flatbuffers = require('../../schema/flatbuffers').flatbuffers;
+const commonBuffer = require('../../lib/commonBuf');
+const livestreamerBuffer = require('../../lib/livestreamerBuf');
+const webstreamerLivestreamer = require('../../schema/livestreamer_generated').webstreamer.livestreamer;
+const webstreamerCommon = require('../../schema/common_generated').webstreamer;
+
+describe('webstreamer livestreamer flatbuf message tests', function () {
+    describe('#Create', function () {
+        let builder = new flatbuffers.Builder(0),
+            endbuilder;
         let buf,
-            endpointType = 'RTSPCLIENT',
-            rtspurl = 'rtsp://172.16.66.66/id=1',
-            videoCodec = 'h265',
-            audioCodec = 'OPUS';
-        let livestreamcreate;
+            name = 'livestream1',
+            endpointName = 'endpoint1',
+            protocol = 'RTSP',
+            url = 'rtsp://172.16.66.66/id=1',
+            initiative = true,
+            audioChannelName = 'audio',
+            audioMode = 'sendrecv',
+            audioCodec = 'OPUS',
+            videoChannelName = 'video',
+            videoMode = 'sendonly',
+            videoCodec = 'H265';
+        let msgObj;
+
         beforeEach(function () {
-            buf = liveStream.generateLiveStreamCreateMsgBuf(1, 2, endpointType, rtspurl, videoCodec, audioCodec);
-            livestreamcreate = Webstreamer.LiveStreamCreate.getRootAsLiveStreamCreate(buf);
+            let audioChannel = commonBuffer.channelBuf(builder, audioChannelName, audioCodec, audioMode),
+                videoChannel = commonBuffer.channelBuf(builder, videoChannelName, videoCodec, videoMode),
+                endpoint = commonBuffer.endpointBuf(builder, endpointName, protocol, url, initiative, videoChannel, audioChannel);
+
+            endbuilder = livestreamerBuffer.liveStreamerCreateBuf(builder, name, endpoint);
+            builder.finish(endbuilder);
+            buf = builder.dataBuffer();
+
+            msgObj = webstreamerLivestreamer.Create.getRootAsCreate(buf);
         });
-        it('Pipeline id should return 1', function () {
-            assert.equal(livestreamcreate.pipeline().id(), 1);
+
+        it(`Create name should return ${name}`, function () {
+            assert.equal(msgObj.name(), name);
         });
-        it('Pipeline video codec should return 1', function () {
-            assert.equal(livestreamcreate.pipeline().videoCodec(), 1);
+
+        it(`Create source name should return ${endpointName}`, function () {
+            assert.equal(msgObj.source(new webstreamerCommon.Endpoint).name(), endpointName);
         });
-        it('Pipeline audio codec should return 1', function () {
-            assert.equal(livestreamcreate.pipeline().audioCodec(), 1);
+
+        it(`Create source protocol should return ${protocol}`, function () {
+            assert.equal(msgObj.source(new webstreamerCommon.Endpoint).protocol(), protocol);
         });
-        it('Endpoint id should return 2', function () {
-            assert.equal(livestreamcreate.endpoint().rtspclient().base().id(), 2);
+
+        it(`Create source url should return ${url}`, function () {
+            assert.equal(msgObj.source(new webstreamerCommon.Endpoint).url(), url);
         });
-        it('Endpoint type should return 0', function () {
-            assert.equal(livestreamcreate.endpoint().rtspclient().base().type(), 0);
+
+        it(`Create source initiative should return ${initiative}`, function () {
+            assert.equal(msgObj.source(new webstreamerCommon.Endpoint).initiative(), initiative);
         });
-        it(`Endpoint url should return ${rtspurl}`, function () {
-            assert.equal(livestreamcreate.endpoint().rtspclient().url(), rtspurl);
+
+        it(`Create source channel test should return ok`, function () {
+            let expectedNames = [videoChannelName, audioChannelName],
+                expectedCodec = [videoCodec, audioCodec],
+                expectedMode = [videoMode, audioMode];
+            let channelLength = msgObj.source(new webstreamerCommon.Endpoint).channelLength();
+
+            for(let i = 0; i< channelLength; i++) {
+                assert.equal(msgObj.source(new webstreamerCommon.Endpoint).channel(i).name(), expectedNames[i]);
+                assert.equal(msgObj.source(new webstreamerCommon.Endpoint).channel(i).codec(), expectedCodec[i]);
+                assert.equal(msgObj.source(new webstreamerCommon.Endpoint).channel(i).mode(), expectedMode[i]);
+            }
         });
     });
 
-    describe('#LiveStreamDestroy', function () {
+    describe('#Destroy', function () {
+        let builder = new flatbuffers.Builder(0),
+            endbuilder;
         let buf,
-            id = 1;
-        let livestreamdestroy;
+            name = 'livestream1';
+        let msgObj;
 
         beforeEach(function () {
-            buf = liveStream.generateLiveStreamDestroyMsgBuf(id);
-            livestreamdestroy = Webstreamer.LiveStreamDestroy.getRootAsLiveStreamDestroy(buf);
+            endbuilder = livestreamerBuffer.liveStreamDestroyBuf(builder, name);
+            builder.finish(endbuilder);
+            buf = builder.dataBuffer();
+
+            msgObj = webstreamerLivestreamer.Destroy.getRootAsDestroy(buf);
         });
 
-        it('id should return 1', function () {
-            assert.equal(livestreamdestroy.id(), 1);
-        })
-    });
-
-    describe('#LiveStreamAddEndpoint', function () {
-        let buf,
-            streamId = 1,
-            endpointId = 2;
-        let livestreamaddendpoint;
-
-        beforeEach(function () {
-            buf = liveStream.generateLiveStreamAddEndpointMsgBuf(streamId, endpointId);
-            livestreamaddendpoint = Webstreamer.LiveStreamAddEndpoint.getRootAsLiveStreamAddEndpoint(buf);
-        });
-
-        it('stream id should return 1', function () {
-            assert.equal(livestreamaddendpoint.id(), 1);
-        });
-
-        it('endpoint id should return 2', function () {
-            assert.equal(livestreamaddendpoint.endpoint().rtspclient().base().id(), 2);
+        it(`Destroy name should return ${name}`, function () {
+            assert.equal(msgObj.name(), name);
         });
     });
 
-    describe('#LiveStreamRemoveEndpoint', function () {
+    describe('#AddViewer', function () {
+        let builder = new flatbuffers.Builder(0),
+            endbuilder;
         let buf,
-            streamId = 1,
-            endpointId = 2;
-        let livestreamremoveendpoint;
+            componentName = 'livestream1',
+            endpointName = 'endpoint1',
+            protocol = 'RTSP';
+            url = 'rtsp://172.16.66.66/id=1',
+            initiative = true,
+            audioChannelName = 'audio',
+            audioMode = 'sendrecv',
+            audioCodec = 'OPUS',
+            videoChannelName = 'video',
+            videoMode = 'sendonly',
+            videoCodec = 'H265';
+        let msgObj;
 
         beforeEach(function () {
-           buf = liveStream.generateLiveStreamRemoveEndpointMsgBuf(streamId, endpointId);
-           livestreamremoveendpoint = Webstreamer.LiveStreamRemoveEndpoint.getRootAsLiveStreamRemoveEndpoint(buf);
+            let audioChannel = commonBuffer.channelBuf(builder, audioChannelName, audioCodec, audioMode),
+                videoChannel = commonBuffer.channelBuf(builder, videoChannelName, videoCodec, videoMode),
+                endpoint = commonBuffer.endpointBuf(builder, endpointName, protocol, url, initiative, videoChannel, audioChannel);
+
+            endbuilder = livestreamerBuffer.liveStreamAddViewerBuf(builder, componentName, endpoint);
+            builder.finish(endbuilder);
+            buf = builder.dataBuffer();
+
+            msgObj = webstreamerLivestreamer.AddViewer.getRootAsAddViewer(buf);
         });
 
-        it('stream id should return 1', function () {
-            assert.equal(livestreamremoveendpoint.id(), 1);
+        it(`AddViewer component name should return ${componentName}`, function () {
+            assert.equal(msgObj.component(), componentName);
         });
 
-        it('endpoint id should return 2', function () {
-            assert.equal(livestreamremoveendpoint.endpointId(), 2);
+        it(`AddViewer viewer name should return ${endpointName}`, function () {
+            assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).name(), endpointName);
         });
-    })
+
+        it(`AddViewer viewer protocol should return ${protocol}`, function () {
+            assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).protocol(), protocol);
+        });
+
+        it(`AddViewer viewer url should return ${url}`, function () {
+            assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).url(), url);
+        });
+
+        it(`AddViewer viewer initiative should return ${initiative}`, function () {
+            assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).initiative(), initiative);
+        });
+
+        it(`AddViewer viewer channel test should return ok`, function () {
+            let expectedNames = [videoChannelName, audioChannelName],
+                expectedCodec = [videoCodec, audioCodec],
+                expectedMode = [videoMode, audioMode];
+            let channelLength = msgObj.viewer(new webstreamerCommon.Endpoint).channelLength();
+
+            for(let i = 0; i< channelLength; i++) {
+                assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).channel(i).name(), expectedNames[i]);
+                assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).channel(i).codec(), expectedCodec[i]);
+                assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).channel(i).mode(), expectedMode[i]);
+            }
+        });
+    });
+
+    describe('#RemoveViewer', function () {
+        let builder = new flatbuffers.Builder(0),
+            endbuilder;
+        let buf,
+            component = 'livestream1',
+            endpoint = 'endpoint1';
+        let msgObj;
+
+        beforeEach(function () {
+            endbuilder = livestreamerBuffer.liveStreamRemoveViewerBuf(builder, component, endpoint);
+            builder.finish(endbuilder);
+            buf = builder.dataBuffer();
+
+            msgObj = webstreamerLivestreamer.RemoveViewer.getRootAsRemoveViewer(buf);
+        });
+
+        it(`RemoveViewer component should return ${component}`, function () {
+            assert.equal(msgObj.component(), component);
+        });
+
+        it(`RemoveViewer endpoint should return ${endpoint}`, function () {
+            assert.equal(msgObj.endpoint(), endpoint);
+        });
+    });
+
+    describe('#LiveStreamError', function () {
+        let builder = new flatbuffers.Builder(0),
+            endbuilder;
+        let buf,
+            code = 1,
+            reason = 'error';
+        let msgObj;
+
+        beforeEach(function () {
+            endbuilder = livestreamerBuffer.liveStreamErrorBuf(builder, code, reason);
+            builder.finish(endbuilder);
+            buf = builder.dataBuffer();
+
+            msgObj = webstreamerLivestreamer.LiveStreamError.getRootAsLiveStreamError(buf);
+        });
+
+        it(`LiveStreamError code should return ${code}`, function () {
+            assert.equal(msgObj.code(), code);
+        });
+
+        it(`LiveStreamError reason should return ${reason}`, function () {
+            assert.equal(msgObj.reason(), reason);
+        });
+    });
+
 });
-
