@@ -19,10 +19,11 @@ describe('Webstreamer flatbuf message tests', function () {
             audioMode = 'sendrecv',
             audioCodec = 'OPUS',
             component = 'livestream1',
+            protocol = 'RTSP',
             endpoint = 'endpoint2';
         let root;
         beforeEach(function () {
-            buf = webstreamerBuffer.generateLiveStreamCreateMsgBuf(component, endpoint, rtspurl, videoCodec, audioCodec, videoMode, audioMode);
+            buf = webstreamerBuffer.generateLiveStreamCreateMsgBuf(component, endpoint, protocol, rtspurl, videoCodec, audioCodec, videoMode, audioMode);
             root = Webstreamer.root.getRootAsroot(buf);
         });
 
@@ -36,6 +37,10 @@ describe('Webstreamer flatbuf message tests', function () {
 
         it(`webstreamer.livestreamer.Create source name should return ${endpoint}`, function () {
             assert.equal(root.any(new webstreamerLivestreamer.Create()).source(new webstreamerCommon.Endpoint).name(), endpoint);
+        });
+
+        it(`webstreamer.livestreamer.Create source protocol should return ${protocol}`, function () {
+            assert.equal(root.any(new webstreamerLivestreamer.Create()).source(new webstreamerCommon.Endpoint).protocol(), protocol);
         });
 
         it(`webstreamer.livestreamer.Create source url should return ${rtspurl}`, function () {
@@ -106,6 +111,10 @@ describe('Webstreamer flatbuf message tests', function () {
 
         it(`webstreamer.livestreamer.AddViewer viewer name should return ${endpoint}`, function () {
             assert.equal(root.any(new webstreamerLivestreamer.AddViewer()).viewer(new webstreamerCommon.Endpoint).name(), endpoint);
+        });
+
+        it(`webstreamer.livestreamer.AddViewer viewer protocol should return null`, function () {
+            assert.equal(root.any(new webstreamerLivestreamer.AddViewer()).viewer(new webstreamerCommon.Endpoint).protocol(), null);
         });
 
         it(`webstreamer.livestreamer.AddViewer viewer url should return null`, function () {

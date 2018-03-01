@@ -19,6 +19,7 @@ describe('webstreamer livestreamer flatbuf message tests', function () {
         let buf,
             name = 'livestream1',
             endpointName = 'endpoint1',
+            protocol = 'RTSP',
             url = 'rtsp://172.16.66.66/id=1',
             initiative = true,
             audioChannelName = 'audio',
@@ -32,7 +33,7 @@ describe('webstreamer livestreamer flatbuf message tests', function () {
         beforeEach(function () {
             let audioChannel = commonBuffer.channelBuf(builder, audioChannelName, audioCodec, audioMode),
                 videoChannel = commonBuffer.channelBuf(builder, videoChannelName, videoCodec, videoMode),
-                endpoint = commonBuffer.endpointBuf(builder, endpointName, url, initiative, videoChannel, audioChannel);
+                endpoint = commonBuffer.endpointBuf(builder, endpointName, protocol, url, initiative, videoChannel, audioChannel);
 
             endbuilder = livestreamerBuffer.liveStreamerCreateBuf(builder, name, endpoint);
             builder.finish(endbuilder);
@@ -47,6 +48,10 @@ describe('webstreamer livestreamer flatbuf message tests', function () {
 
         it(`Create source name should return ${endpointName}`, function () {
             assert.equal(msgObj.source(new webstreamerCommon.Endpoint).name(), endpointName);
+        });
+
+        it(`Create source protocol should return ${protocol}`, function () {
+            assert.equal(msgObj.source(new webstreamerCommon.Endpoint).protocol(), protocol);
         });
 
         it(`Create source url should return ${url}`, function () {
@@ -97,6 +102,7 @@ describe('webstreamer livestreamer flatbuf message tests', function () {
         let buf,
             componentName = 'livestream1',
             endpointName = 'endpoint1',
+            protocol = 'RTSP';
             url = 'rtsp://172.16.66.66/id=1',
             initiative = true,
             audioChannelName = 'audio',
@@ -110,7 +116,7 @@ describe('webstreamer livestreamer flatbuf message tests', function () {
         beforeEach(function () {
             let audioChannel = commonBuffer.channelBuf(builder, audioChannelName, audioCodec, audioMode),
                 videoChannel = commonBuffer.channelBuf(builder, videoChannelName, videoCodec, videoMode),
-                endpoint = commonBuffer.endpointBuf(builder, endpointName, url, initiative, videoChannel, audioChannel);
+                endpoint = commonBuffer.endpointBuf(builder, endpointName, protocol, url, initiative, videoChannel, audioChannel);
 
             endbuilder = livestreamerBuffer.liveStreamAddViewerBuf(builder, componentName, endpoint);
             builder.finish(endbuilder);
@@ -125,6 +131,10 @@ describe('webstreamer livestreamer flatbuf message tests', function () {
 
         it(`AddViewer viewer name should return ${endpointName}`, function () {
             assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).name(), endpointName);
+        });
+
+        it(`AddViewer viewer protocol should return ${protocol}`, function () {
+            assert.equal(msgObj.viewer(new webstreamerCommon.Endpoint).protocol(), protocol);
         });
 
         it(`AddViewer viewer url should return ${url}`, function () {

@@ -29,15 +29,15 @@ describe('webstreamer common flatbuf message tests', function () {
             msgObj = webstreamerCommon.Channel.getRootAsChannel(buf);
         });
 
-        it(`Channel name should return ${channelName}'`, function () {
+        it(`Channel name should return ${channelName}`, function () {
             assert.equal(msgObj.name(), channelName);
         });
 
-        it(`Channel codec should return ${audioCodec}'`, function () {
+        it(`Channel codec should return ${audioCodec}`, function () {
             assert.equal(msgObj.codec(), audioCodec);
         });
 
-        it(`Channel mode should return ${audioMode}'`, function () {
+        it(`Channel mode should return ${audioMode}`, function () {
             assert.equal(msgObj.mode(), audioMode);
         });
     });
@@ -47,6 +47,7 @@ describe('webstreamer common flatbuf message tests', function () {
             endbuilder;
         let buf,
             name = 'endpoint1',
+            protocol = 'RTSP',
             url = 'rtsp://172.16.66.66/id=1',
             initiative = true,
             audioChannelName = 'audio',
@@ -60,7 +61,7 @@ describe('webstreamer common flatbuf message tests', function () {
         beforeEach(function () {
             let audioChannel = commonBuffer.channelBuf(builder, audioChannelName, audioCodec, audioMode),
                 videoChannel = commonBuffer.channelBuf(builder, videoChannelName, videoCodec, videoMode);
-            endbuilder = commonBuffer.endpointBuf(builder, name, url, initiative, videoChannel, audioChannel);
+            endbuilder = commonBuffer.endpointBuf(builder, name, protocol, url, initiative, videoChannel, audioChannel);
 
             builder.finish(endbuilder);
             buf = builder.dataBuffer();
@@ -68,15 +69,19 @@ describe('webstreamer common flatbuf message tests', function () {
             msgObj = webstreamerCommon.Endpoint.getRootAsEndpoint(buf);
         });
 
-        it(`Endpoint name should return ${name}'`, function () {
+        it(`Endpoint name should return ${name}`, function () {
             assert.equal(msgObj.name(), name);
+        });
+
+        it(`Endpoint protocol should return ${protocol}`, function () {
+            assert.equal(msgObj.protocol(), protocol);
         });
 
         it(`Endpoint url should return ${url}'`, function () {
             assert.equal(msgObj.url(), url);
         });
 
-        it(`Endpoint initiative should return ${initiative}'`, function () {
+        it(`Endpoint initiative should return ${initiative}`, function () {
             assert.equal(msgObj.initiative(), initiative);
         });
 
@@ -115,15 +120,15 @@ describe('webstreamer common flatbuf message tests', function () {
             assert.equal(msgObj.type(), type);
         });
 
-        it(`Topic component should return ${component}'`, function () {
+        it(`Topic component should return ${component}`, function () {
             assert.equal(msgObj.component(), component);
         });
 
-        it(`Topic endpoint should return ${endpoint}'`, function () {
+        it(`Topic endpoint should return ${endpoint}`, function () {
             assert.equal(msgObj.endpoint(), endpoint);
         });
 
-        it(`Topic content should return ${content}'`, function () {
+        it(`Topic content should return ${content}`, function () {
             assert.equal(msgObj.content(), content);
         });
     });
@@ -151,11 +156,11 @@ describe('webstreamer common flatbuf message tests', function () {
             }
         });
 
-        it(`Subscription component should return ${component}'`, function () {
+        it(`Subscription component should return ${component}`, function () {
             assert.equal(msgObj.component(), component);
         });
 
-        it(`Subscription endpoint should return ${endpoint}'`, function () {
+        it(`Subscription endpoint should return ${endpoint}`, function () {
             assert.equal(msgObj.endpoint(), endpoint);
         });
     });

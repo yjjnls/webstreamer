@@ -156,8 +156,17 @@ webstreamer.Endpoint.prototype.name = function(optionalEncoding) {
  * @param {flatbuffers.Encoding=} optionalEncoding
  * @returns {string|Uint8Array|null}
  */
-webstreamer.Endpoint.prototype.url = function(optionalEncoding) {
+webstreamer.Endpoint.prototype.protocol = function(optionalEncoding) {
   var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
+};
+
+/**
+ * @param {flatbuffers.Encoding=} optionalEncoding
+ * @returns {string|Uint8Array|null}
+ */
+webstreamer.Endpoint.prototype.url = function(optionalEncoding) {
+  var offset = this.bb.__offset(this.bb_pos, 8);
   return offset ? this.bb.__string(this.bb_pos + offset, optionalEncoding) : null;
 };
 
@@ -165,7 +174,7 @@ webstreamer.Endpoint.prototype.url = function(optionalEncoding) {
  * @returns {boolean}
  */
 webstreamer.Endpoint.prototype.initiative = function() {
-  var offset = this.bb.__offset(this.bb_pos, 8);
+  var offset = this.bb.__offset(this.bb_pos, 10);
   return offset ? !!this.bb.readInt8(this.bb_pos + offset) : false;
 };
 
@@ -175,7 +184,7 @@ webstreamer.Endpoint.prototype.initiative = function() {
  * @returns {webstreamer.Channel}
  */
 webstreamer.Endpoint.prototype.channel = function(index, obj) {
-  var offset = this.bb.__offset(this.bb_pos, 10);
+  var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? (obj || new webstreamer.Channel).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
 };
 
@@ -183,7 +192,7 @@ webstreamer.Endpoint.prototype.channel = function(index, obj) {
  * @returns {number}
  */
 webstreamer.Endpoint.prototype.channelLength = function() {
-  var offset = this.bb.__offset(this.bb_pos, 10);
+  var offset = this.bb.__offset(this.bb_pos, 12);
   return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
 };
 
@@ -191,7 +200,7 @@ webstreamer.Endpoint.prototype.channelLength = function() {
  * @param {flatbuffers.Builder} builder
  */
 webstreamer.Endpoint.startEndpoint = function(builder) {
-  builder.startObject(4);
+  builder.startObject(5);
 };
 
 /**
@@ -204,10 +213,18 @@ webstreamer.Endpoint.addName = function(builder, nameOffset) {
 
 /**
  * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} protocolOffset
+ */
+webstreamer.Endpoint.addProtocol = function(builder, protocolOffset) {
+  builder.addFieldOffset(1, protocolOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
  * @param {flatbuffers.Offset} urlOffset
  */
 webstreamer.Endpoint.addUrl = function(builder, urlOffset) {
-  builder.addFieldOffset(1, urlOffset, 0);
+  builder.addFieldOffset(2, urlOffset, 0);
 };
 
 /**
@@ -215,7 +232,7 @@ webstreamer.Endpoint.addUrl = function(builder, urlOffset) {
  * @param {boolean} initiative
  */
 webstreamer.Endpoint.addInitiative = function(builder, initiative) {
-  builder.addFieldInt8(2, +initiative, +false);
+  builder.addFieldInt8(3, +initiative, +false);
 };
 
 /**
@@ -223,7 +240,7 @@ webstreamer.Endpoint.addInitiative = function(builder, initiative) {
  * @param {flatbuffers.Offset} channelOffset
  */
 webstreamer.Endpoint.addChannel = function(builder, channelOffset) {
-  builder.addFieldOffset(3, channelOffset, 0);
+  builder.addFieldOffset(4, channelOffset, 0);
 };
 
 /**
