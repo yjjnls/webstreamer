@@ -4,8 +4,11 @@
   "description": "WebStreamer",
   "main": "index.js",
   "scripts": {
+    "test": "./node_modules/.bin/mocha test/commonbuf test/livestreambuf test/webstreamerbuf ",
     "basic-test": "./node_modules/.bin/mocha test/basic",
-    "livestreambuf-test": "./node_modules/.bin/mocha test/livestreambuf"
+    "livestreambuf-test": "./node_modules/.bin/mocha test/livestreambuf",
+    "webstreamerbuf-test": "./node_modules/.bin/mocha test/webstreamerbuf",
+    "commonbuf-test": "./node_modules/.bin/mocha test/commonbuf"
   },
   "repository": {
     "type": "git",
