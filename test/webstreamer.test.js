@@ -6,7 +6,7 @@ const chai = require('chai');
 let expect = chai.expect,
     assert = chai.assert;
 
-const WebStreamer = require('../../index').WebStreamer;
+const WebStreamer = require('../index').WebStreamer;
 
 describe('WebStreamer', function () {
 
