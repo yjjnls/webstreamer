@@ -9,7 +9,8 @@ function Initialize(option){
 		return;
 	}
 
-    webstreamer_ = new WebStreamer()
+	webstreamer_ = new WebStreamer()
+	return webstreamer_.initialize()
 
 }
 
@@ -20,6 +21,9 @@ function Terminate(){
 	return webstreamer_.terminate();
 }
 
+function Version(){
+	return webstreamer_.version();
+}
 
 class RTSPTestServer extends RTSPTestServerBase  {
 	constructor(name) {
@@ -32,5 +36,6 @@ module.exports = {
 
 	Initialize : Initialize,
 	Terminate  : Terminate,
+	Version    : Version,
 	RTSPTestServer : RTSPTestServer
 };

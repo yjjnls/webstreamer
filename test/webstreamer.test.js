@@ -7,6 +7,7 @@ let expect = chai.expect,
     assert = chai.assert;
 
 const WebStreamer = require('../index').WebStreamer;
+const WS = require('../index')
 
 describe('WebStreamer', function () {
 
@@ -14,19 +15,15 @@ describe('WebStreamer', function () {
         let webstreamer = undefined;
 
         before(async () => {
-            if( webstreamer === undefined ){
-                webstreamer = new WebStreamer();
-                await webstreamer.initialize({user:"abc"})
-            }
+            await WS.Initialize({user:"abc"})
         });
 
         after(async () => {
-            assert.isObject( webstreamer )
-            await webstreamer.terminate()
+            await WS.Terminate()
         });
 
         it(`version`, async () => {
-            assert.isString( webstreamer.version())
+            assert.isString( WS.Version())
         });
     });
 
