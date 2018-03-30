@@ -24,6 +24,6 @@
     "mocha": "^5.0.1"
   },
   "dependencies": {
-    "node-plugin": "^0.2.2"
+    "node-plugin": "^0.3.0"
   }
 }
