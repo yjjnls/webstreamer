@@ -32,6 +32,13 @@ class RTSPTestServer extends _RTSPTestServer  {
     }
 }
 
+_IElementWatcher = require('./lib/elementwatcher').IElementWatcher
+class IElementWatcher extends _IElementWatcher  {
+	constructor(name) {
+        super(webstreamer_,name);
+    }
+}
+
 //class IAVanalyzer extends _IAVanalyzer  {
 //	constructor(name) {
 //        super(webstreamer_,name);
@@ -45,5 +52,5 @@ module.exports = {
 	Terminate  : Terminate,
 	Version    : Version,
 	RTSPTestServer : RTSPTestServer,
-//	IAVanalyzer : IAVanalyzer
+	IElementWatcher : IElementWatcher
 };

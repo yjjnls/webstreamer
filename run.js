@@ -12,7 +12,9 @@ async function sleep(timeout) {
   }
 
 async function main_rtsp_server(){
+    console.log("+ webstreamer.Initialize()")
     await webstreamer.Initialize()
+    console.log("- webstreamer.Initialize()")
 
     console.log("processing")
     rtsp = new webstreamer.RTSPTestServer("rtsptest.1")
@@ -22,7 +24,7 @@ async function main_rtsp_server(){
     
     await rtsp.startup()
     
-    console.log("--------------------------")
+    
     
     //await sleep(15*1000)
     console.log("to end")
@@ -36,17 +38,18 @@ async function main_rtsp_server(){
 
 }
 
+var IElementWatcher = require('./lib/elementwatcher')
 async function main_analyzer(){
     await webstreamer.Initialize()
 
     console.log("processing")
-    app = new webstreamer.IAVanalyzer("avanalyzer.1")
+    app = new webstreamer.IElementWatcher("avanalyzer.1")
 
     await app.initialize()
-    
+    console.log("####--------------------------")
     await app.startup()
     
-    console.log("--------------------------")
+    
     
     //await sleep(15*1000)
     //console.log("to end")
@@ -61,7 +64,8 @@ async function main_analyzer(){
 }
 async function main()
 {
-    return main_rtsp_server()   
+    return main_analyzer()
+    //return main_rtsp_server()   
 }
 main().then(value => {
     console.log("success:",value)
