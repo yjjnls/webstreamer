@@ -38,15 +38,12 @@ async function main_rtsp_server(){
 
 }
 
-var IElementWatcher = require('./lib/elementwatcher')
+const RTSPTestClient = require('./lib/rtsptestclient').RTSPTestClient
 async function main_analyzer(){
     await webstreamer.Initialize()
-
-    console.log("processing")
-    app = new webstreamer.IElementWatcher("avanalyzer.1")
+    app = new webstreamer.RTSPTestClient("avanalyzer.1")
 
     await app.initialize()
-    console.log("####--------------------------")
     await app.startup()
     
     
@@ -70,6 +67,6 @@ async function main()
 main().then(value => {
     console.log("success:",value)
 }).catch(err=>{
-    console.log("fail:",err)
+    console.log("fail:",err.toString('utf8'))
 })
 console.log("...................");

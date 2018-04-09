@@ -28,14 +28,17 @@ function Version(){
 
 class RTSPTestServer extends _RTSPTestServer  {
 	constructor(name) {
-        super(webstreamer_,name);
+		super(webstreamer_,name);
+		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
 
-_IElementWatcher = require('./lib/elementwatcher').IElementWatcher
-class IElementWatcher extends _IElementWatcher  {
+const _RTSPTestClient = require('./lib/rtsptestclient').RTSPTestClient
+class RTSPTestClient extends _RTSPTestClient  {
 	constructor(name) {
-        super(webstreamer_,name);
+		super(webstreamer_,name);
+		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+
     }
 }
 
@@ -52,5 +55,5 @@ module.exports = {
 	Terminate  : Terminate,
 	Version    : Version,
 	RTSPTestServer : RTSPTestServer,
-	IElementWatcher : IElementWatcher
+	RTSPTestClient : RTSPTestClient
 };
