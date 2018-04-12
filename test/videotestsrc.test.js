@@ -10,7 +10,31 @@ const WS   = require('../index');
 const Poll = require('../index').Poll;
 const tesseract = require('node-tesseract');
 const Promise = require('bluebird');
+const uuid = require('node-uuid');
+const fs = require('fs');
 
+function rmdirsSync (targetPath) {
+    try{
+        let files = [];
+        if( fs.existsSync(targetPath) ) {
+            files = fs.readdirSync(targetPath);
+            files.forEach(function(file,index){
+                let curPath = targetPath + "/" + file;
+                if(fs.statSync(curPath).isDirectory()) { // recurse
+                    if(!rmdirsSync(curPath)) return false;
+                } else { // delete file
+                    fs.unlinkSync(curPath);
+                }
+            });
+            fs.rmdirSync(targetPath);
+        }
+    }catch(e)
+    {
+        log.error("remove director fail! path=" + targetPath + " errorMsg:" + e);
+        return false;
+    }
+    return true;
+};
 
 function TimeToMillisecond (str){ 
     var reg = /^(\d{1}):(\d{2}):(\d{2}).(\d{3})$/; 
@@ -35,7 +59,6 @@ function ocr ( filename ){
 
     return new Promise(function (resolve, reject) {
        tesseract.process(filename, options, function(err, text) {
-           //console.log(err,"!",text)
            if(err) {
                reject(err);
            } else {
@@ -52,6 +75,7 @@ function ocr ( filename ){
 }
 
 describe('GStreamerTestSrcAnalyzer', function () {
+    let out_dir=null;
 
     before(async function()  {
         await WS.Initialize()
@@ -62,17 +86,37 @@ describe('GStreamerTestSrcAnalyzer', function () {
 
     });
 
+    beforeEach( async function(){
+
+    })
+
+    afterEach( async function(){
+        if( out_dir){
+            if( fs.existsSync(out_dir)){
+                rmdirsSync(out_dir);
+            }
+            out_dir = null;
+        }
+    })
+
 
 
     it(`GStreamerVideoTestSrcAnalyzer`, async function() {
-        const SIZE=0
+        const SIZE=5
         let images=[];
-        var app = new WS.GStreamerVideoTestSrcAnalyzer('v1111');
+        out_dir = 'img@' + uuid.v4();
+        var app = new WS.GStreamerVideoTestSrcAnalyzer('GStreamerVideoTestSrcAnalyzer.1');
+        app.option.image.fps = 10 //10 frame per second
+        app.option.image.location =`${out_dir}/%05d.jpg`
+        console.log('=>',app.option.image.location)
+        fs.mkdirSync(out_dir)
+
         app.on('multifilesink',async function (data,meta) {
             var j = JSON.parse(data.toString('utf8'));
             var filename = j["filename"]
             var time = j["stream-time"]/1000000
             images.push({filename:filename,time:time})
+            
         })
         
         await app.initialize();
@@ -83,7 +127,7 @@ describe('GStreamerTestSrcAnalyzer', function () {
             return images.length >= SIZE;}
         )
         await app.stop();
-   
+
         await app.terminate();
         for(var i=0 ; i < SIZE; i++){
             let filename = images[i].filename
@@ -92,7 +136,6 @@ describe('GStreamerTestSrcAnalyzer', function () {
             try {
                 ms = await ocr(filename);
             }catch (err){
-                assert.fail(err)
             }
             assert.closeTo(time, ms, 75, 'ocr recognize time')
 
