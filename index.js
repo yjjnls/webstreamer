@@ -50,27 +50,9 @@ class GStreamerVideoTestSrcAnalyzer extends _GStreamerVideoTestSrcAnalyzer  {
 		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
-
-
-async function Poll(func,tick=100,timeout=3*1000){
-    let elapse=0;
-    return new Promise(function (resolve, reject) {       
-        let interval = setInterval(function () {
-            elapse +=tick;
-            if( func() ){
-                clearInterval(interval);
-                resolve();
-            }
-           
-            if(elapse > timeout){
-                clearInterval(interval);
-                reject();
-            }
-        }, tick);
-    })
-}
+const utils = require('./lib/utils')
 module.exports = {
-	Poll : Poll,
+	utils : utils,
 	WebStreamer : WebStreamer,
 
 	Initialize : Initialize,
