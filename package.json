@@ -4,7 +4,7 @@
   "description": "WebStreamer",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha test -t 5000 --async-only"
+    "test": "./node_modules/.bin/mocha --no-deprecation test -t 5000 --async-only"
   },
   "repository": {
     "type": "git",
