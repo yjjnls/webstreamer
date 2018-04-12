@@ -6,55 +6,24 @@ const chai = require('chai');
 let expect = chai.expect,
     assert = chai.assert;
 
-const WS   = require('../index');
-const Poll = require('../index').Poll;
+const webstreamer = require('../index');
+let WS   = webstreamer,
+    poll = webstreamer.utils.poll,
+    rmdirSync = webstreamer.utils.rmdirSync,
+    parseTime = webstreamer.utils.parseTime;
+
 const tesseract = require('node-tesseract');
 const Promise = require('bluebird');
 const uuid = require('node-uuid');
 const fs = require('fs');
 
-function rmdirsSync (targetPath) {
-    try{
-        let files = [];
-        if( fs.existsSync(targetPath) ) {
-            files = fs.readdirSync(targetPath);
-            files.forEach(function(file,index){
-                let curPath = targetPath + "/" + file;
-                if(fs.statSync(curPath).isDirectory()) { // recurse
-                    if(!rmdirsSync(curPath)) return false;
-                } else { // delete file
-                    fs.unlinkSync(curPath);
-                }
-            });
-            fs.rmdirSync(targetPath);
-        }
-    }catch(e)
-    {
-        log.error("remove director fail! path=" + targetPath + " errorMsg:" + e);
-        return false;
-    }
-    return true;
-};
-
-function TimeToMillisecond (str){ 
-    var reg = /^(\d{1}):(\d{2}):(\d{2}).(\d{3})$/; 
-    var r = str.match(reg); 
-    if( r ){
-        var h  = parseInt(r[1])
-        var m  = parseInt(r[2])
-        var s  = parseInt(r[3])
-        var ms = parseInt(r[4])
-        return (h* 60*60 +m* 60 + s)*1000 +ms
-    }
-    return null;
-} 
 
 function ocr ( filename ){
 
     var options = {
         psm: 7,
         //binary: 'C:/Program Files (x86)/Tesseract-OCR/tesseract'//'/usr/local/bin/tesseract',
-        //config: 'digits'
+        config: 'time'
         };
 
     return new Promise(function (resolve, reject) {
@@ -62,8 +31,10 @@ function ocr ( filename ){
            if(err) {
                reject(err);
            } else {
+
                var strtime = text.replace(/[\r\n\f]/g,"")
-               var ms = TimeToMillisecond(strtime)
+               strtime = strtime.replace(/[,]/g,".")
+               var ms = parseTime(strtime)
                if( ms == null ){
                    reject("invalide time format:" + strtime);
                } else {
@@ -93,7 +64,7 @@ describe('GStreamerTestSrcAnalyzer', function () {
     afterEach( async function(){
         if( out_dir){
             if( fs.existsSync(out_dir)){
-                rmdirsSync(out_dir);
+                rmdirSync(out_dir);
             }
             out_dir = null;
         }
@@ -102,13 +73,12 @@ describe('GStreamerTestSrcAnalyzer', function () {
 
 
     it(`GStreamerVideoTestSrcAnalyzer`, async function() {
-        const SIZE=5
+        const SIZE=3
         let images=[];
         out_dir = 'img@' + uuid.v4();
         var app = new WS.GStreamerVideoTestSrcAnalyzer('GStreamerVideoTestSrcAnalyzer.1');
         app.option.image.fps = 10 //10 frame per second
         app.option.image.location =`${out_dir}/%05d.jpg`
-        console.log('=>',app.option.image.location)
         fs.mkdirSync(out_dir)
 
         app.on('multifilesink',async function (data,meta) {
@@ -123,7 +93,7 @@ describe('GStreamerTestSrcAnalyzer', function () {
 
         await app.startup()
    
-        await Poll(()=>{
+        await poll(()=>{
             return images.length >= SIZE;}
         )
         await app.stop();
@@ -132,11 +102,7 @@ describe('GStreamerTestSrcAnalyzer', function () {
         for(var i=0 ; i < SIZE; i++){
             let filename = images[i].filename
             let time = images[i].time
-            var ms=null; 
-            try {
-                ms = await ocr(filename);
-            }catch (err){
-            }
+            var ms = await ocr(filename);
             assert.closeTo(time, ms, 75, 'ocr recognize time')
 
         }
