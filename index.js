@@ -50,6 +50,15 @@ class GStreamerVideoTestSrcAnalyzer extends _GStreamerVideoTestSrcAnalyzer  {
 		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
+
+const _GStreamerAudioTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerAudioTestSrcAnalyzer
+class GStreamerAudioTestSrcAnalyzer extends _GStreamerAudioTestSrcAnalyzer  {
+	constructor(name) {
+		super(webstreamer_,name);
+		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+    }
+}
+
 const utils = require('./lib/utils')
 module.exports = {
 	utils : utils,
@@ -60,5 +69,6 @@ module.exports = {
 	Version    : Version,
 
 	RTSPTestServer : RTSPTestServer,
-	GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer
+	GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
+	GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer
 };
