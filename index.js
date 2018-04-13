@@ -2,7 +2,7 @@
 const WebStreamer  = require('./lib/webstreamer').WebStreamer;
 var _RTSPTestServer = require('./lib/rtsptestserver').RTSPTestServer;
 //var _IAVanalyzer = require('./lib/avanalyzer').IAVAnalyzer;
-var webstreamer_=null
+var webstreamer_=null;
 
 function Initialize(option){
 
@@ -10,8 +10,8 @@ function Initialize(option){
 		return;
 	}
 
-	webstreamer_ = new WebStreamer()
-	return webstreamer_.initialize()
+	webstreamer_ = new WebStreamer();
+	return webstreamer_.initialize();
 
 }
 
@@ -42,6 +42,15 @@ class RTSPTestClient extends _RTSPTestClient  {
     }
 }
 
+const _LiveStream = require('./lib/livestream').LiveStream
+class LiveStream extends _LiveStream {
+	constructor(name) {
+		super(webstreamer_, name);
+		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+
+	}
+}
+
 //class IAVanalyzer extends _IAVanalyzer  {
 //	constructor(name) {
 //        super(webstreamer_,name);
@@ -55,5 +64,6 @@ module.exports = {
 	Terminate  : Terminate,
 	Version    : Version,
 	RTSPTestServer : RTSPTestServer,
-	RTSPTestClient : RTSPTestClient
+	RTSPTestClient : RTSPTestClient,
+	LiveStream: LiveStream
 };
