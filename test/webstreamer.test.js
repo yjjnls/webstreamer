@@ -1,38 +1,21 @@
-/**
- * Created by Ganchao on 2018/2/2.
- */
-
 const chai = require('chai');
-let expect = chai.expect,
-    assert = chai.assert;
+let assert = chai.assert;
 
-const WebStreamer = require('../index').WebStreamer;
-const WS = require('../index');
+const plugin = require('../index');
 
 describe('WebStreamer', function () {
+    describe('#interface', function () {
+        before(async () => {
+            await plugin.Initialize();
+        });
 
-  describe('#interface', function () {
-      let webstreamer = undefined;
+        after(async () => {
+            await plugin.Terminate();
+        });
 
-     beforeEach(async () => {
-          await WS.Initialize({user:"abc"})
-      });
-
-     afterEach(async () => {
-          await WS.Terminate()
-      });
-
-     it(`version`, async () => {
-          assert.isString( WS.Version())
-      });
-
-      it(`version1`, async () => {
-        assert.isString( WS.Version())
+        it(`version`, async () => {
+            assert.isString(plugin.Version());
+        });
+        
     });
-
-    it(`version2`, async () => {
-        assert.isString( WS.Version())
-    });
-
-  });
-})
+});

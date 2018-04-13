@@ -2,13 +2,15 @@
 const WebStreamer  = require('./lib/webstreamer').WebStreamer;
 var webstreamer_=null
 
-function Initialize(option){
+function Initialize(port){
 
 	if( webstreamer_ ){
-		return;
+		throw new Error('Webstreamer has been initialized once!');
 	}
 
 	webstreamer_ = new WebStreamer()
+	if (port)
+		webstreamer_.set_port(port);
 	return webstreamer_.initialize()
 
 }
@@ -21,11 +23,11 @@ function Terminate(){
 	return new Promise(function (resolve, reject) {       
 		webstreamer_.terminate()
 		.then( data =>{
-			webstreamer_=null;
+			// webstreamer_=null;
 			resolve(data);
 
 		}).catch( err =>{
-			webstreamer_=null;
+			// webstreamer_=null;
 			reject(err);
 		});
 	})
