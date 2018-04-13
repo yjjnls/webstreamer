@@ -53,26 +53,17 @@ class GStreamerVideoTestSrcAnalyzer extends _GStreamerVideoTestSrcAnalyzer  {
     }
 }
 
-
-async function Poll(func,tick=100,timeout=3*1000){
-    let elapse=0;
-    return new Promise(function (resolve, reject) {       
-        let interval = setInterval(function () {
-            elapse +=tick;
-            if( func() ){
-                clearInterval(interval);
-                resolve();
-            }
-           
-            if(elapse > timeout){
-                clearInterval(interval);
-                reject();
-            }
-        }, tick);
-    })
+const _GStreamerAudioTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerAudioTestSrcAnalyzer
+class GStreamerAudioTestSrcAnalyzer extends _GStreamerAudioTestSrcAnalyzer  {
+	constructor(name) {
+		super(webstreamer_,name);
+		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+    }
 }
+
+const utils = require('./lib/utils')
 module.exports = {
-	Poll : Poll,
+	utils : utils,
 	WebStreamer : WebStreamer,
 
 	Initialize : Initialize,
@@ -80,5 +71,6 @@ module.exports = {
 	Version    : Version,
 
 	RTSPTestServer : RTSPTestServer,
-	GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer
+	GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
+	GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer
 };
