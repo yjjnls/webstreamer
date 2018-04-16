@@ -1,18 +1,24 @@
 
 const WebStreamer  = require('./lib/webstreamer').WebStreamer;
-var webstreamer_=null
+var webstreamer_ = null;
 
-function Initialize(port){
+function Initialize(options) {
+    if (webstreamer_) {
+        throw new Error('Webstreamer has been initialized once!');
+    }
 
-	if( webstreamer_ ){
-		throw new Error('Webstreamer has been initialized once!');
-	}
-
-	webstreamer_ = new WebStreamer()
-	if (port)
-		webstreamer_.set_port(port);
-	return webstreamer_.initialize()
-
+    webstreamer_ = new WebStreamer();
+    if (options) {
+        for (var key in options) {
+            if (webstreamer_.option[key]) {
+                if (typeof webstreamer_.option[key] == 'object')
+                    webstreamer_.option[key] = Object.assign(webstreamer_.option[key], options[key]);
+                else
+                    webstreamer_.option[key] = options[key];
+            }
+        }
+    }
+    return webstreamer_.initialize();
 }
 
 function Terminate(){

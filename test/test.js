@@ -16,7 +16,7 @@ async function mocha_test(file) {
     return new Promise(function (resolve, reject) {
         child_process.exec(command, function (error, stdout, stderr) {
             if (error) {
-                reject(error);
+                reject(`[mocha test] ${error}\n${stdout}`);
             }
             resolve([stdout, stderr]);
         });
@@ -46,8 +46,25 @@ async function test(filePath) {
             }
         }
     } catch (err) {
-        throw new Error(err.message);
+        throw new Error(err);
     }
 }
 
-test(dir);
+async function test_single_file(file) {
+    try {
+        let res = await mocha_test(test_file);
+        console.log(res[0]);
+        console.log(res[1]);
+    } catch (error) {
+        throw new Error(error);
+    }
+
+}
+var test_file = process.argv[2];
+if (test_file) {
+    test_single_file(test_file);
+
+}
+else {
+    test(dir);
+}
