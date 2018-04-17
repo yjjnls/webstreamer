@@ -4,7 +4,9 @@
   "description": "WebStreamer",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha test -t 5000 --async-only"
+    "test": "./node_modules/.bin/mocha --no-deprecation test -t 5000 --async-only",
+    "eslint": "eslint lib/. --config .eslintrc.json",
+    "eslint_single": "eslint test --config .eslintrc.json"
   },
   "repository": {
     "type": "git",
@@ -21,10 +23,11 @@
   "homepage": "https://github.com/kedacomresearch/webstreamer#README.md",
   "devDependencies": {
     "chai": "^4.1.2",
-    "mocha": "^5.0.1"
+    "eslint": "^4.19.1",
+    "mocha": "^5.0.5"
   },
   "dependencies": {
-    "node-plugin": "^0.3.0",
+    "node-plugin": "^0.4.1",
     "node-tesseract": "^0.2.7"
   }
 }
