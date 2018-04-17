@@ -1,6 +1,6 @@
 
 const WebStreamer  = require('./lib/webstreamer').WebStreamer;
-var webstreamer_=null
+var webstreamer_=null;
 
 function Initialize(port){
 
@@ -13,6 +13,8 @@ function Initialize(port){
 		webstreamer_.set_port(port);
 	return webstreamer_.initialize()
 
+    webstreamer_ = new WebStreamer();
+    return webstreamer_.initialize();
 }
 
 function Terminate(){
@@ -34,22 +36,22 @@ function Terminate(){
 }
 
 function Version(){
-	return webstreamer_.version();
+    return webstreamer_.version();
 }
 
 var _RTSPTestServer = require('./lib/rtsptestserver').RTSPTestServer;
 class RTSPTestServer extends _RTSPTestServer  {
-	constructor(name) {
-		super(webstreamer_,name);
-		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+    constructor(name) {
+        super(webstreamer_,name);
+        webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
 
-const _GStreamerVideoTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerVideoTestSrcAnalyzer
+const _GStreamerVideoTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerVideoTestSrcAnalyzer;
 class GStreamerVideoTestSrcAnalyzer extends _GStreamerVideoTestSrcAnalyzer  {
-	constructor(name) {
-		super(webstreamer_,name);
-		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+    constructor(name) {
+        super(webstreamer_,name);
+        webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
 
@@ -66,11 +68,12 @@ module.exports = {
 	utils : utils,
 	WebStreamer : WebStreamer,
 
-	Initialize : Initialize,
-	Terminate  : Terminate,
-	Version    : Version,
+  Initialize : Initialize,
+  Terminate  : Terminate,
+  Version    : Version,
 
 	RTSPTestServer : RTSPTestServer,
 	GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
 	GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer
+
 };

@@ -16,6 +16,5 @@ describe('WebStreamer', function () {
         it(`version`, async () => {
             assert.isString(plugin.Version());
         });
-        
     });
 });
