@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha --no-deprecation test -t 5000 --async-only",
-    "eslint": "eslint lib/. --config .eslintrc.json",
-    "eslint_single": "eslint test --config .eslintrc.json"
+    "eslint": "eslint index.js lib/. --config .eslintrc.json"
   },
   "repository": {
     "type": "git",
