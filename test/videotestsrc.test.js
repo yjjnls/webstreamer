@@ -5,52 +5,45 @@
 const chai = require('chai');
 let assert = chai.assert;
 
-const WS   = require('../index');
-const Poll = require('../index').Poll;
+const webstreamer = require('../index');
+let WS   = webstreamer,
+    poll = webstreamer.utils.poll,
+    rmdirSync = webstreamer.utils.rmdirSync,
+    parseTime = webstreamer.utils.parseTime;
+
 const tesseract = require('node-tesseract');
 const Promise = require('bluebird');
-
-
-function TimeToMillisecond (str){ 
-    var reg = /^(\d{1}):(\d{2}):(\d{2}).(\d{3})$/; 
-    var r = str.match(reg); 
-    if( r ){
-        var h  = parseInt(r[1]);
-        var m  = parseInt(r[2]);
-        var s  = parseInt(r[3]);
-        var ms = parseInt(r[4]);
-        return (h* 60*60 +m* 60 + s)*1000 +ms;
-    }
-    return null;
-} 
+const uuid = require('node-uuid');
+const fs = require('fs');
 
 function ocr ( filename ){
 
     let options = {
         psm: 7
+        config: 'time'
     };
-        //binary: 'C:/Program Files (x86)/Tesseract-OCR/tesseract'//'/usr/local/bin/tesseract',
-        //config: 'digits'
-
 
     return new Promise(function (resolve, reject) {
-        tesseract.process(filename, options, function(err, text) {
-            if(err) {
-                reject(err);
-            } else {
-                let strtime = text.replace(/[\r\n\f]/g,'');
-                let ms = TimeToMillisecond(strtime);
-                if( ms === null ){
-                    reject('invalide time format:' + strtime);
-                } else {
-                    resolve(ms);
-                }
-            }
-        });
-    });
+       tesseract.process(filename, options, function(err, text) {
+           if(err) {
+               reject(err);
+           } else {
+
+               var strtime = text.replace(/[\r\n\f]/g,"")
+               strtime = strtime.replace(/[,]/g,".")
+               var ms = parseTime(strtime)
+               if( ms == null ){
+                   reject("invalide time format:" + strtime);
+               } else {
+                   resolve(ms)
+               }                
+           }
+       })
+    })
 }
 
 describe('GStreamerTestSrcAnalyzer', function () {
+    let out_dir=null;
 
     before(async function()  {
         await WS.Initialize();
@@ -61,40 +54,52 @@ describe('GStreamerTestSrcAnalyzer', function () {
 
     });
 
+    beforeEach( async function(){
 
+    })
 
-    it('GStreamerVideoTestSrcAnalyzer', async function() {
-        const SIZE=3;
+    afterEach( async function(){
+        if( out_dir){
+            if( fs.existsSync(out_dir)){
+                rmdirSync(out_dir);
+            }
+            out_dir = null;
+        }
+    })
+
+    it(`GStreamerVideoTestSrcAnalyzer`, async function() {
+        const SIZE=3
         let images=[];
-        var app = new WS.GStreamerVideoTestSrcAnalyzer('v1111');
-        app.on('multifilesink',async function (data) {
+        out_dir = 'img@' + uuid.v4();
+        var app = new WS.GStreamerVideoTestSrcAnalyzer('GStreamerVideoTestSrcAnalyzer.1');
+        app.option.image.fps = 10 //10 frame per second
+        app.option.image.location =`${out_dir}/%05d.jpg`
+        fs.mkdirSync(out_dir)
+
+        app.on('multifilesink',async function (data,meta) {
             var j = JSON.parse(data.toString('utf8'));
-            var filename = j['filename'];
-            var time = j['stream-time']/1000000;
-            images.push({filename:filename,time:time});
-        });
+            var filename = j["filename"]
+            var time = j["stream-time"]/1000000
+            images.push({filename:filename,time:time})
+            
+        })
         
         await app.initialize();
 
         await app.startup();
    
-        await Poll(()=>{
-            return images.length >= SIZE;
-        });
+        await poll(()=>{
+            return images.length >= SIZE;}
+        )
         await app.stop();
-   
-        await app.terminate();
 
-        for(let i=0 ; i < SIZE; i++){
-            let filename = images[i].filename;
-            let time = images[i].time;
-            let ms=null;
-            try {
-                ms = await ocr(filename);
-            }catch (err){
-                assert.fail(err);
-            }
-            assert.closeTo(time, ms, 75, 'ocr recognize time');
+        await app.terminate();
+      
+        for(var i=0 ; i < SIZE; i++){
+            let filename = images[i].filename
+            let time = images[i].time
+            var ms = await ocr(filename);
+            assert.closeTo(time, ms, 75, 'ocr recognize time')
 
         }
     });

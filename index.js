@@ -2,31 +2,37 @@
 const WebStreamer  = require('./lib/webstreamer').WebStreamer;
 var webstreamer_=null;
 
-function Initialize(){
-    if( webstreamer_ ){
-        return;
-    }
+function Initialize(port){
+
+	if( webstreamer_ ){
+		throw new Error('Webstreamer has been initialized once!');
+	}
+
+	webstreamer_ = new WebStreamer()
+	if (port)
+		webstreamer_.set_port(port);
+	return webstreamer_.initialize()
 
     webstreamer_ = new WebStreamer();
     return webstreamer_.initialize();
 }
 
 function Terminate(){
-    if( !webstreamer_ ){
-        return;
-    }
+	if( !webstreamer_ ){
+		return;
+	}
 
-    return new Promise(function (resolve, reject) {
-        webstreamer_.terminate()
-            .then( data =>{
-                webstreamer_=null;
-                resolve(data);
-            })
-            .catch( err =>{
-                webstreamer_=null;
-                reject(err);
-            });
-    });
+	return new Promise(function (resolve, reject) {       
+		webstreamer_.terminate()
+		.then( data =>{
+			// webstreamer_=null;
+			resolve(data);
+
+		}).catch( err =>{
+			// webstreamer_=null;
+			reject(err);
+		});
+	})
 }
 
 function Version(){
@@ -49,31 +55,25 @@ class GStreamerVideoTestSrcAnalyzer extends _GStreamerVideoTestSrcAnalyzer  {
     }
 }
 
-async function Poll(func,tick=100,timeout=3*1000){
-    let elapse=0;
-    return new Promise(function (resolve, reject) {
-        let interval = setInterval(function () {
-            elapse +=tick;
-            if( func() ){
-                clearInterval(interval);
-                resolve();
-            }
-
-            if(elapse > timeout){
-                clearInterval(interval);
-                reject();
-            }
-        }, tick);
-    });
+const _GStreamerAudioTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerAudioTestSrcAnalyzer
+class GStreamerAudioTestSrcAnalyzer extends _GStreamerAudioTestSrcAnalyzer  {
+	constructor(name) {
+		super(webstreamer_,name);
+		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+    }
 }
+
+const utils = require('./lib/utils')
 module.exports = {
-    Poll : Poll,
-    WebStreamer : WebStreamer,
+	utils : utils,
+	WebStreamer : WebStreamer,
 
-    Initialize : Initialize,
-    Terminate  : Terminate,
-    Version    : Version,
+  Initialize : Initialize,
+  Terminate  : Terminate,
+  Version    : Version,
 
-    RTSPTestServer : RTSPTestServer,
-    GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer
+	RTSPTestServer : RTSPTestServer,
+	GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
+	GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer
+
 };
