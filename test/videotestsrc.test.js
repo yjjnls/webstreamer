@@ -19,7 +19,7 @@ const fs = require('fs');
 function ocr ( filename ){
 
     let options = {
-        psm: 7
+        psm: 7,
         config: 'time'
     };
 
