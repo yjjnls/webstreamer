@@ -1,12 +1,11 @@
 {
   "name": "webstreamer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "WebStreamer",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --no-deprecation test -t 5000 --async-only",
+    "test": "node test/test.js ",
     "eslint": "eslint index.js lib/. --config .eslintrc.json"
-    "test": "node test/test.js"
   },
   "repository": {
     "type": "git",

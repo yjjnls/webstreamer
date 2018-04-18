@@ -2,19 +2,31 @@ var path = require('path');
 var child_process = require('child_process');
 var Promise = require('bluebird');
 var dir = path.resolve(__dirname);
+//const os = require('os')
 
 var fs = Promise.promisifyAll(require('fs'));
-let command_prefix = dir + '/../node_modules/.bin/mocha ';
-
+let command_prefix = dir + '/../node_modules/.bin/mocha';
+//if (os.platform() == 'win32'){
+//    command_prefix +='.cmd';
+//}
 // function sleep(ms) {
 //     return new Promise(resolve => {
 //         setTimeout(resolve, ms);
 //     });
 // }
 async function mocha_test(file) {
-    let command = command_prefix + file + ' -c';
+    const OPTIONS = {
+        'test/videotestsrc.test.js': '-t 5000'
+    };
+    
+    var options = '';
+    if ( OPTIONS[file] ){
+        options = OPTIONS[file];
+    } 
+    
+    let command = `${command_prefix} ${file} -c ${options}`;
     return new Promise(function (resolve, reject) {
-        child_process.exec(command, function (error, stdout, stderr) {
+        child_process.exec(command, function (error, stdout, stderr) {            
             if (error) {
                 reject(error);
             }
