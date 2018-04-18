@@ -3,8 +3,7 @@
  */
 
 const chai = require('chai');
-let expect = chai.expect,
-    assert = chai.assert;
+let assert = chai.assert;
 
 const webstreamer = require('../index');
 let WS   = webstreamer,
@@ -17,14 +16,12 @@ const Promise = require('bluebird');
 const uuid = require('node-uuid');
 const fs = require('fs');
 
-
 function ocr ( filename ){
 
-    var options = {
+    let options = {
         psm: 7,
-        //binary: 'C:/Program Files (x86)/Tesseract-OCR/tesseract'//'/usr/local/bin/tesseract',
         config: 'time'
-        };
+    };
 
     return new Promise(function (resolve, reject) {
        tesseract.process(filename, options, function(err, text) {
@@ -49,11 +46,11 @@ describe('GStreamerTestSrcAnalyzer', function () {
     let out_dir=null;
 
     before(async function()  {
-        await WS.Initialize()
+        await WS.Initialize();
     });
 
     after(async function() {
-        await WS.Terminate()
+        await WS.Terminate();
 
     });
 
@@ -69,8 +66,6 @@ describe('GStreamerTestSrcAnalyzer', function () {
             out_dir = null;
         }
     })
-
-
 
     it(`GStreamerVideoTestSrcAnalyzer`, async function() {
         const SIZE=3
@@ -91,7 +86,7 @@ describe('GStreamerTestSrcAnalyzer', function () {
         
         await app.initialize();
 
-        await app.startup()
+        await app.startup();
    
         await poll(()=>{
             return images.length >= SIZE;}
@@ -99,6 +94,7 @@ describe('GStreamerTestSrcAnalyzer', function () {
         await app.stop();
 
         await app.terminate();
+      
         for(var i=0 ; i < SIZE; i++){
             let filename = images[i].filename
             let time = images[i].time
