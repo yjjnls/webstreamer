@@ -18,15 +18,15 @@ async function mocha_test(file) {
     const OPTIONS = {
         'test/videotestsrc.test.js': '-t 5000'
     };
-    
+
     var options = '';
-    if ( OPTIONS[file] ){
+    if (OPTIONS[file]) {
         options = OPTIONS[file];
-    } 
-    
+    }
+
     let command = `${command_prefix} ${file} -c ${options}`;
     return new Promise(function (resolve, reject) {
-        child_process.exec(command, function (error, stdout, stderr) {            
+        child_process.exec(command, function (error, stdout, stderr) {
             if (error) {
                 reject(`[mocha test] ${error}\n${stdout}`);
             }
