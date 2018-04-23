@@ -6,7 +6,15 @@ const plugin = require('../index');
 describe('WebStreamer', function () {
     describe('#interface', function () {
         before(async () => {
-            await plugin.Initialize();
+            try {
+                await plugin.Initialize({
+                    rtsp_server: {
+                        port: 555
+                    }
+                });
+            } catch (err) {
+                throw new Error(err.toString());
+            }
         });
 
         after(async () => {

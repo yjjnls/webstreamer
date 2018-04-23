@@ -1,79 +1,112 @@
 
-const WebStreamer  = require('./lib/webstreamer').WebStreamer;
-var webstreamer_=null;
+const WebStreamer = require('./lib/webstreamer').WebStreamer;
+var webstreamer_ = null;
 
-function Initialize(port){
-
-	if( webstreamer_ ){
-		throw new Error('Webstreamer has been initialized once!');
-	}
-
-	webstreamer_ = new WebStreamer()
-	if (port)
-		webstreamer_.set_port(port);
-	return webstreamer_.initialize()
+function Initialize(options) {
+    if (webstreamer_) {
+        throw new Error('Webstreamer has been initialized once!');
+    }
 
     webstreamer_ = new WebStreamer();
+    if (options) {
+        for (var key in options) {
+            if (webstreamer_.option[key]) {
+                if (typeof webstreamer_.option[key] == 'object')
+                    webstreamer_.option[key] = Object.assign(webstreamer_.option[key], options[key]);
+                else
+                    webstreamer_.option[key] = options[key];
+            }
+        }
+    }
     return webstreamer_.initialize();
 }
 
-function Terminate(){
-	if( !webstreamer_ ){
-		return;
-	}
+function Terminate() {
+    if (!webstreamer_) {
+        return;
+    }
 
-	return new Promise(function (resolve, reject) {       
-		webstreamer_.terminate()
-		.then( data =>{
-			// webstreamer_=null;
-			resolve(data);
+    return new Promise(function (resolve, reject) {
+        webstreamer_.terminate()
+            .then(data => {
+                // webstreamer_=null;
+                resolve(data);
 
-		}).catch( err =>{
-			// webstreamer_=null;
-			reject(err);
-		});
-	})
+            }).catch(err => {
+                // webstreamer_=null;
+                reject(err);
+            });
+    });
 }
 
-function Version(){
+function Version() {
     return webstreamer_.version();
 }
+var default_option = require('./lib/analyzesource.js').option;
 
 var _RTSPTestServer = require('./lib/rtsptestserver').RTSPTestServer;
-class RTSPTestServer extends _RTSPTestServer  {
-    constructor(name) {
-        super(webstreamer_,name);
+class RTSPTestServer extends _RTSPTestServer {
+    constructor(name, option = undefined) {
+        if (!option) {
+            super(webstreamer_, name, default_option);
+        }
+        else {
+            super(webstreamer_, name, option);
+        }
+        webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+    }
+}
+
+var _RTSPAnalyzer = require('./lib/rtspanalyzer').RTSPAnalyzer;
+class RTSPAnalyzer extends _RTSPAnalyzer {
+    constructor(name, url, option = undefined) {
+        if (!option)
+            super(webstreamer_, name, url, default_option);
+        else
+            super(webstreamer_, name, url, option);
         webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
 
 const _GStreamerVideoTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerVideoTestSrcAnalyzer;
-class GStreamerVideoTestSrcAnalyzer extends _GStreamerVideoTestSrcAnalyzer  {
+class GStreamerVideoTestSrcAnalyzer extends _GStreamerVideoTestSrcAnalyzer {
     constructor(name) {
-        super(webstreamer_,name);
+        super(webstreamer_, name);
         webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
 
-const _GStreamerAudioTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerAudioTestSrcAnalyzer
-class GStreamerAudioTestSrcAnalyzer extends _GStreamerAudioTestSrcAnalyzer  {
-	constructor(name) {
-		super(webstreamer_,name);
-		webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+const _GStreamerAudioTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerAudioTestSrcAnalyzer;
+class GStreamerAudioTestSrcAnalyzer extends _GStreamerAudioTestSrcAnalyzer {
+    constructor(name) {
+        super(webstreamer_, name);
+        webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
 
-const utils = require('./lib/utils')
+const _LiveStream = require('./lib/livestream').LiveStream;
+class LiveStream extends _LiveStream {
+    constructor(name) {
+        super(webstreamer_, name);
+        webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+
+    }
+}
+
+const utils = require('./lib/utils');
 module.exports = {
-	utils : utils,
-	WebStreamer : WebStreamer,
+    option: default_option,
+    utils: utils,
+    WebStreamer: WebStreamer,
 
-  Initialize : Initialize,
-  Terminate  : Terminate,
-  Version    : Version,
+    Initialize: Initialize,
+    Terminate: Terminate,
+    Version: Version,
 
-	RTSPTestServer : RTSPTestServer,
-	GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
-	GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer
+    RTSPTestServer: RTSPTestServer,
+    RTSPAnalyzer: RTSPAnalyzer,
+    GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
+    GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer,
+    LiveStream: LiveStream
 
 };

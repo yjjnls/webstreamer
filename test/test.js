@@ -1,37 +1,32 @@
+'use strict';
 var path = require('path');
-var child_process = require('child_process');
 var Promise = require('bluebird');
 var dir = path.resolve(__dirname);
-//const os = require('os')
+var spawn = require('child_process').spawn;
 
 var fs = Promise.promisifyAll(require('fs'));
-let command_prefix = dir + '/../node_modules/.bin/mocha';
-//if (os.platform() == 'win32'){
-//    command_prefix +='.cmd';
-//}
-// function sleep(ms) {
-//     return new Promise(resolve => {
-//         setTimeout(resolve, ms);
-//     });
-// }
+let mocha_command = dir + '/../node_modules/.bin/mocha';
+
+let internal_test_file = [
+    'test/videotestsrc.test.js',
+    'test/audiotestsrc.test.js'
+];
+
 async function mocha_test(file) {
     const OPTIONS = {
         'test/videotestsrc.test.js': '-t 5000'
     };
-    
+
     var options = '';
-    if ( OPTIONS[file] ){
+    if (OPTIONS[file]) {
         options = OPTIONS[file];
-    } 
-    
-    let command = `${command_prefix} ${file} -c ${options}`;
-    return new Promise(function (resolve, reject) {
-        child_process.exec(command, function (error, stdout, stderr) {            
-            if (error) {
-                reject(error);
-            }
-            resolve([stdout, stderr]);
-        });
+    }
+
+    let args = `${file} -c ${options}`;
+
+    spawn(mocha_command, [args], {
+        stdio: 'inherit',
+        shell: true
     });
 }
 
@@ -46,11 +41,10 @@ async function test(filePath) {
                 .then(res => { return res; })
                 .catch(err => { throw new Error(err.message); });
             if (status.isFile()) {
-                let fname = filedir.substr(dir.length + 1);
-                if (fname != 'test.js') {
-                    let res = await mocha_test('test/' + fname);
-                    console.log(res[0]);
-                    // console.error(res[1]);
+                let fname = 'test/' + filedir.substr(dir.length + 1);
+                if (fname != 'test/test.js' &&
+                    internal_test_file.indexOf(fname) == -1) {
+                    await mocha_test(fname);
                 }
             }
             if (status.isDirectory()) {
@@ -58,8 +52,29 @@ async function test(filePath) {
             }
         }
     } catch (err) {
-        throw new Error(err.message);
+        throw new Error(err);
     }
 }
 
-test(dir);
+async function test_single_file(file) {
+    try {
+        await mocha_test(file);
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
+if (process.argv[2] == '--internal') {
+    internal_test_file.forEach((value) => {
+        test_single_file(value);
+    });
+    return;
+}
+
+var test_file = process.argv[2];
+
+if (test_file) {
+    test_single_file(test_file);
+} else {
+    test(dir);
+}

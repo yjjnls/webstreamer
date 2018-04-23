@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node test/test.js ",
-    "eslint": "eslint index.js lib/. --config .eslintrc.json"
+    "eslint": "eslint index.js lib/. --config .eslintrc.json",
+    "internal_test": "node test/test.js --internal"
   },
   "repository": {
     "type": "git",

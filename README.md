@@ -8,6 +8,15 @@
 
   You do not have to install tesseract ,unless runing OCR related feature.
 
+```js
+// run all tests
+$ npm test
+
+// run a single test
+$ npm test test/webstreamer.test.js
+```
+
+
 
 
 
