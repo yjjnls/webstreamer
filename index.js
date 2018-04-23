@@ -42,11 +42,28 @@ function Terminate() {
 function Version() {
     return webstreamer_.version();
 }
+var default_option = require('./lib/analyzesource.js').option;
 
 var _RTSPTestServer = require('./lib/rtsptestserver').RTSPTestServer;
 class RTSPTestServer extends _RTSPTestServer {
-    constructor(name) {
-        super(webstreamer_, name);
+    constructor(name, option = undefined) {
+        if (!option) {
+            super(webstreamer_, name, default_option);
+        }
+        else {
+            super(webstreamer_, name, option);
+        }
+        webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+    }
+}
+
+var _RTSPAnalyzer = require('./lib/rtspanalyzer').RTSPAnalyzer;
+class RTSPAnalyzer extends _RTSPAnalyzer {
+    constructor(name, url, option = undefined) {
+        if (!option)
+            super(webstreamer_, name, url, default_option);
+        else
+            super(webstreamer_, name, url, option);
         webstreamer_.apps_[`${this.name}@${this.type}`] = this;
     }
 }
@@ -78,6 +95,7 @@ class LiveStream extends _LiveStream {
 
 const utils = require('./lib/utils');
 module.exports = {
+    option: default_option,
     utils: utils,
     WebStreamer: WebStreamer,
 
@@ -86,6 +104,7 @@ module.exports = {
     Version: Version,
 
     RTSPTestServer: RTSPTestServer,
+    RTSPAnalyzer: RTSPAnalyzer,
     GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
     GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer,
     LiveStream: LiveStream
