@@ -68,6 +68,17 @@ class RTSPAnalyzer extends _RTSPAnalyzer {
     }
 }
 
+var _WebRTCAnalyzer = require('./lib/rtspanalyzer').WebRTCAnalyzer;
+class WebRTCAnalyzer extends _WebRTCAnalyzer {
+    constructor(name, signal_bridge, id = 1234, option = undefined) {
+        if (!option)
+            super(webstreamer_, name, signal_bridge, id, default_option);
+        else
+            super(webstreamer_, name, signal_bridge, id, option);
+        webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+    }
+}
+
 const _GStreamerVideoTestSrcAnalyzer = require('./lib/gsttestsrcanalyzer').GStreamerVideoTestSrcAnalyzer;
 class GStreamerVideoTestSrcAnalyzer extends _GStreamerVideoTestSrcAnalyzer {
     constructor(name) {
@@ -107,6 +118,7 @@ module.exports = {
     RTSPAnalyzer: RTSPAnalyzer,
     GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
     GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer,
-    LiveStream: LiveStream
+    LiveStream: LiveStream,
+    WebRTCAnalyzer: WebRTCAnalyzer
 
 };
