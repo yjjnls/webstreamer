@@ -23,8 +23,8 @@ let audience_ep = {
 let audience_ep_webrtc = {
     name: 'endpoint3',
     protocol: 'webrtc', // rtspclient/rtspserver
-    signal_bridge: 'ws://localhost:8443',
-    connection_id: 1111
+    signal_bridge: 'http://localhost:3030/livestream.webrtc',
+    connection_id: '1111'
 };
 async function add_livestream() {
     // create livestream
@@ -57,7 +57,7 @@ async function init_rtsp_analyzer() {
 }
 
 async function init_webrtc_analyzer() {
-    webrtc_analyzer_app = new plugin.WebRTCAnalyzer("webrtc_test_analyzer", 'ws://localhost:8443', 1111);
+    webrtc_analyzer_app = new plugin.WebRTCAnalyzer("webrtc_test_analyzer", audience_ep_webrtc.signal_bridge, audience_ep_webrtc.connection_id);
     await webrtc_analyzer_app.initialize();
     webrtc_analyzer_app.on('spectrum', function (data, meta) {
         var obj = JSON.parse(data.toString('utf8'));
