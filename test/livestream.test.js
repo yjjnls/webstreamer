@@ -24,7 +24,8 @@ let audience_ep_webrtc = {
     name: 'endpoint3',
     protocol: 'webrtc', // rtspclient/rtspserver
     signal_bridge: 'ws://localhost:8443',
-    connection_id: 1111
+    connection_id: 1111,
+    role: 'offer'
 };
 async function add_livestream() {
     // create livestream
@@ -56,8 +57,10 @@ async function init_rtsp_analyzer() {
     });
 }
 
-async function init_webrtc_analyzer() {
-    webrtc_analyzer_app = new plugin.WebRTCAnalyzer("webrtc_test_analyzer", 'ws://localhost:8443', 1111);
+async function init_webrtc_analyzer(role = 'answer', launch = null) {
+    webrtc_analyzer_app = new plugin.WebRTCAnalyzer("webrtc_test_analyzer", 'ws://localhost:8443', role, 1111);
+    if (launch)
+        webrtc_analyzer_app.launch = launch;
     await webrtc_analyzer_app.initialize();
     webrtc_analyzer_app.on('spectrum', function (data, meta) {
         var obj = JSON.parse(data.toString('utf8'));
@@ -183,6 +186,51 @@ describe('WebStreamer', function () {
             await webrtc_analyzer_app.clean();
 
         });
+        it.skip(`webrtc analyze (offer change)`, async () => {
+            let launch = `( webrtcbin name=webrtc `
+                + ` videotestsrc pattern=ball ! x264enc ! rtph264pay ! queue ! application/x-rtp,media=video,payload=96,encoding-name=H264 ! webrtc. `
+                + ` audiotestsrc wave=saw ! alawenc ! rtppcmapay ! queue ! application/x-rtp,media=audio,payload=8,encoding-name=PCMA ! webrtc. `
+                + ` )`;
+            await init_webrtc_analyzer('offer', launch);
+
+            // add audience(webrtc)
+            let ep = audience_ep_webrtc;
+            ep.role = 'answer';
+            await livestream_app.addAudience(ep);
+            await sleep(1000);
+            await webrtc_analyzer_app.startup();
+            await sleep(50000);
+
+            try {
+                await poll(() => {
+                    if ((webrtc_analyzer_app.audio_passed >= 3) &&
+                        (webrtc_analyzer_app.images.length >= 10))
+                        return true;
+                    else
+                        return false;
+                }, 100, 10000);
+                console.log('\n===>audio analyze passed!');
+                await webrtc_analyzer_app.stop();
+
+                let image_res = await webrtc_analyzer_app.analyze_image();
+                image_res.forEach((value) => {
+                    assert.closeTo(value.time, value.ms, 10, 'ocr recognize time');
+                });
+                console.log('\n===>video analyze passed!');
+            } catch (error) {
+                await webrtc_analyzer_app.stop();
+                console.log('~~~~~~~~~~~~~~error~~~~~~~~~~~~~~~~\n' + error);
+
+                await remove_livestream();
+                throw new Error('video analyze failed: ' + error);
+            }
+            // it's not necessary here, when the analyzer stop, it will automaticlly deteced and remove the
+            await livestream_app.removeAudience(audience_ep_webrtc.name);
+
+            await webrtc_analyzer_app.terminate();
+            await webrtc_analyzer_app.clean();
+
+        });
 
         it.skip(`webrtc to web`, async () => {
 
@@ -191,7 +239,7 @@ describe('WebStreamer', function () {
             let ep = audience_ep_webrtc;
             ep.connection_id = 1234; // for web
             await livestream_app.addAudience(ep);
-            await sleep(20000);
+            await sleep(200000);
 
             await livestream_app.removeAudience(audience_ep_webrtc.name);
         });
