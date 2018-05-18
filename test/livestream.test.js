@@ -58,7 +58,7 @@ async function init_rtsp_analyzer() {
 }
 
 async function init_webrtc_analyzer(role = 'answer', launch = null) {
-    webrtc_analyzer_app = new plugin.WebRTCAnalyzer("webrtc_test_analyzer", 'ws://localhost:8443', role, 1111);
+    webrtc_analyzer_app = new plugin.WebRTCAnalyzer("webrtc_test_analyzer", audience_ep_webrtc.signal_bridge, role, audience_ep_webrtc.connection_id);
     if (launch)
         webrtc_analyzer_app.launch = launch;
     await webrtc_analyzer_app.initialize();
