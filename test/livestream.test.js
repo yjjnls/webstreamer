@@ -110,7 +110,7 @@ describe('WebStreamer', function () {
             await plugin.Terminate();
         });
 
-        it.skip(`rtsp analyze`, async () => {
+        it(`rtsp analyze`, async () => {
             await init_rtsp_analyzer();
             // add audience(rtsp)
             await livestream_app.addAudience(audience_ep);
@@ -147,12 +147,12 @@ describe('WebStreamer', function () {
             await rtsp_analyzer_app.clean();
 
         });
-        it(`webrtc analyze`, async () => {
+        it.skip(`webrtc analyze`, async () => {
             await init_webrtc_analyzer();
 
             // add audience(webrtc)
             await webrtc_analyzer_app.startup();
-            await sleep(1000);
+            // await sleep(1000);
             await livestream_app.addAudience(audience_ep_webrtc);
             // await sleep(50000);
 
@@ -235,7 +235,7 @@ describe('WebStreamer', function () {
         it.skip(`webrtc to web`, async () => {
 
             // add audience(webrtc)
-            await sleep(1000);
+            // await sleep(5000);
             let ep = audience_ep_webrtc;
             ep.connection_id = 1234; // for web
             await livestream_app.addAudience(ep);
