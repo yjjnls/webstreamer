@@ -1,6 +1,7 @@
 
 const WebStreamer = require('./lib/webstreamer').WebStreamer;
 var webstreamer_ = null;
+var tesseract = require('./lib/tesseract.js');
 
 function Initialize(options) {
     if (webstreamer_) {
@@ -119,6 +120,7 @@ module.exports = {
     GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
     GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer,
     LiveStream: LiveStream,
-    WebRTCAnalyzer: WebRTCAnalyzer
+    WebRTCAnalyzer: WebRTCAnalyzer,
+    tesseract: tesseract
 
 };

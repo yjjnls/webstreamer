@@ -4,6 +4,7 @@ let assert = chai.assert;
 const plugin = require('../index');
 const poll = plugin.utils.poll;
 
+
 let rtsp_test_server_app,
     livestream_app,
     rtsp_analyzer_app,
@@ -47,18 +48,24 @@ async function remove_livestream() {
 async function init_rtsp_analyzer() {
     rtsp_analyzer_app = new plugin.RTSPAnalyzer("rtsp_test_analyzer", "rtsp://127.0.0.1/test_server");
     await rtsp_analyzer_app.initialize();
+    // audio
     rtsp_analyzer_app.on('spectrum', function (data, meta) {
         var obj = JSON.parse(data.toString('utf8'));
         let magnitude = obj.magnitude;
         rtsp_analyzer_app.calc_band_number(magnitude);
     });
-    rtsp_analyzer_app.on('multifilesink', async function (data, meta) {
-        rtsp_analyzer_app.store_image(data);
+    // video
+    rtsp_analyzer_app.on('image_data', async function (data, meta) {
+        rtsp_analyzer_app.video_analyze(data, meta);
     });
+
 }
 
 async function init_webrtc_analyzer(role = 'answer', launch = null) {
-    webrtc_analyzer_app = new plugin.WebRTCAnalyzer("webrtc_test_analyzer", audience_ep_webrtc.signal_bridge, role, audience_ep_webrtc.connection_id);
+    webrtc_analyzer_app = new plugin.WebRTCAnalyzer("webrtc_test_analyzer",
+        audience_ep_webrtc.signal_bridge,
+        role,
+        audience_ep_webrtc.connection_id);
     if (launch)
         webrtc_analyzer_app.launch = launch;
     await webrtc_analyzer_app.initialize();
@@ -67,9 +74,13 @@ async function init_webrtc_analyzer(role = 'answer', launch = null) {
         let magnitude = obj.magnitude;
         webrtc_analyzer_app.calc_band_number(magnitude);
     });
-    webrtc_analyzer_app.on('multifilesink', async function (data, meta) {
-        webrtc_analyzer_app.store_image(data);
+    webrtc_analyzer_app.on('image_data', async function (data, meta) {
+        // console.log(data.toString());
+        webrtc_analyzer_app.video_analyze(data, meta);
     });
+    // webrtc_analyzer_app.on('multifilesink', async function (data, meta) {
+    //     webrtc_analyzer_app.store_image(data);
+    // });
 }
 async function sleep(timeout) {
     return new Promise((resolve, reject) => {
@@ -117,6 +128,7 @@ describe('WebStreamer', function () {
             await sleep(500);
             // analyze
             await rtsp_analyzer_app.startup();
+            // await sleep(50000);
 
             try {
                 await poll(() => {
@@ -127,7 +139,6 @@ describe('WebStreamer', function () {
                         return false;
                 }, 100, 10000);
                 console.log('\n===>audio analyze passed!');
-                await rtsp_analyzer_app.stop();
 
                 let image_res = await rtsp_analyzer_app.analyze_image();
                 image_res.forEach((value) => {
@@ -141,10 +152,14 @@ describe('WebStreamer', function () {
                 await remove_livestream();
                 throw new Error('video analyze failed: ' + error);
             }
+            await sleep(100);
+            await rtsp_analyzer_app.stop();
+            console.log('\n===>rtsp_analyzer_app.stop');
+
             await livestream_app.removeAudience(audience_ep.name);
 
             await rtsp_analyzer_app.terminate();
-            await rtsp_analyzer_app.clean();
+            // await rtsp_analyzer_app.clean();
 
         });
         it.skip(`webrtc analyze`, async () => {
@@ -165,7 +180,6 @@ describe('WebStreamer', function () {
                         return false;
                 }, 100, 10000);
                 console.log('\n===>audio analyze passed!');
-                await webrtc_analyzer_app.stop();
 
                 let image_res = await webrtc_analyzer_app.analyze_image();
                 image_res.forEach((value) => {
@@ -179,11 +193,13 @@ describe('WebStreamer', function () {
                 await remove_livestream();
                 throw new Error('video analyze failed: ' + error);
             }
+            await sleep(100);
+            await webrtc_analyzer_app.stop();
             // it's not necessary here, when the analyzer stop, it will automaticlly deteced and remove the
             await livestream_app.removeAudience(audience_ep_webrtc.name);
 
             await webrtc_analyzer_app.terminate();
-            await webrtc_analyzer_app.clean();
+            // await webrtc_analyzer_app.clean();
 
         });
         it.skip(`webrtc analyze (offer change)`, async () => {
