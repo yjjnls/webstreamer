@@ -5,6 +5,6 @@ export LD_LIBRARY_PATH=/home/conan/.conan/data/libwebstreamer/0.1.0-dev/yjjnls/t
 pushd /tmp
 git clone https://github.com/yjjnls/nothing.git
 export TESSDATA_PREFIX=/tmp/nothing/tessdata/
-popd -
+popd
 export GST_DEBUG=webstreamer:5
 export GSTREAMER_ROOT=/opt/gstreamer/linux_x86_64
