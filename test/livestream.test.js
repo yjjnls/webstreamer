@@ -114,7 +114,7 @@ describe('WebStreamer', function () {
 
         after(async () => {
             await remove_livestream();
-
+            // await sleep(500);
             await rtsp_test_server_app.stop();
             await rtsp_test_server_app.terminate();
 
@@ -200,7 +200,6 @@ describe('WebStreamer', function () {
 
             await webrtc_analyzer_app.terminate();
             // await webrtc_analyzer_app.clean();
-
         });
         it.skip(`webrtc analyze (offer change)`, async () => {
             let launch = `( webrtcbin name=webrtc `
@@ -262,3 +261,72 @@ describe('WebStreamer', function () {
 
     });
 });
+
+
+async function test() {
+    // initialize plugin
+    try {
+        await plugin.Initialize({
+            rtsp_server: {
+                port: 554
+            }
+        });
+    } catch (err) {
+        throw new Error(err.toString());
+    }
+    // initialize rtsp test server app
+    rtsp_test_server_app = new plugin.RTSPTestServer("rtsp_test_server");
+    await rtsp_test_server_app.initialize();
+    await rtsp_test_server_app.startup();
+    // initialize analyzer app
+    await add_livestream();
+    /**---------------------------------------------------------------------- */
+
+    await init_webrtc_analyzer();
+
+    // add audience(webrtc)
+    await webrtc_analyzer_app.startup();
+    // await sleep(1000);
+    await livestream_app.addAudience(audience_ep_webrtc);
+    // await sleep(50000);
+
+    try {
+        await poll(() => {
+            if ((webrtc_analyzer_app.audio_passed >= 3) &&
+                (webrtc_analyzer_app.images.length >= 10))
+                return true;
+            else
+                return false;
+        }, 100, 10000);
+        console.log('\n===>audio analyze passed!');
+
+        let image_res = await webrtc_analyzer_app.analyze_image();
+        image_res.forEach((value) => {
+            assert.closeTo(value.time, value.ms, 10, 'ocr recognize time');
+        });
+        console.log('\n===>video analyze passed!');
+    } catch (error) {
+        await webrtc_analyzer_app.stop();
+        console.log('~~~~~~~~~~~~~~error~~~~~~~~~~~~~~~~\n' + error);
+
+        await remove_livestream();
+        throw new Error('video analyze failed: ' + error);
+    }
+    await sleep(100);
+    await webrtc_analyzer_app.stop();
+    // it's not necessary here, when the analyzer stop, it will automaticlly deteced and remove the
+    await livestream_app.removeAudience(audience_ep_webrtc.name);
+
+    await webrtc_analyzer_app.terminate();
+    // await webrtc_analyzer_app.clean();
+
+    /**---------------------------------------------------------------------- */
+    await remove_livestream();
+    await rtsp_test_server_app.stop();
+    await rtsp_test_server_app.terminate();
+
+    await plugin.Terminate();
+
+}
+
+// test();
