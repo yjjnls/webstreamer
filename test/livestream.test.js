@@ -12,7 +12,7 @@ let rtsp_test_server_app,
 let performer_ep = {
     name: 'endpoint1',
     protocol: 'rtspclient', // rtspclient/rtspserver
-    url: 'rtsp://127.0.0.1/test',
+    url: 'rtsp://127.0.0.1:8554/test',
     video_codec: 'h264', // optional
     audio_codec: 'pcma' // optional
 };
@@ -46,7 +46,7 @@ async function remove_livestream() {
 }
 
 async function init_rtsp_analyzer() {
-    rtsp_analyzer_app = new plugin.RTSPAnalyzer("rtsp_test_analyzer", "rtsp://127.0.0.1/test_server");
+    rtsp_analyzer_app = new plugin.RTSPAnalyzer("rtsp_test_analyzer", "rtsp://127.0.0.1:8554/test_server");
     await rtsp_analyzer_app.initialize();
     // audio
     rtsp_analyzer_app.on('spectrum', function (data, meta) {
@@ -97,11 +97,11 @@ describe('WebStreamer', function () {
             try {
                 await plugin.Initialize({
                     rtsp_server: {
-                        port: 554
+                        port: 8554
                     }
                 });
             } catch (err) {
-                throw new Error(err.toString());
+                throw new Error(err.message);
             }
             // initialize rtsp test server app
             rtsp_test_server_app = new plugin.RTSPTestServer("rtsp_test_server");
@@ -114,7 +114,8 @@ describe('WebStreamer', function () {
 
         after(async () => {
             await remove_livestream();
-            // await sleep(500);
+            // this is important
+            await sleep(100);
             await rtsp_test_server_app.stop();
             await rtsp_test_server_app.terminate();
 
@@ -162,7 +163,7 @@ describe('WebStreamer', function () {
             // await rtsp_analyzer_app.clean();
 
         });
-        it.skip(`webrtc analyze`, async () => {
+        it(`webrtc analyze`, async () => {
             await init_webrtc_analyzer();
 
             // add audience(webrtc)
@@ -322,6 +323,7 @@ async function test() {
 
     /**---------------------------------------------------------------------- */
     await remove_livestream();
+    await sleep(100);
     await rtsp_test_server_app.stop();
     await rtsp_test_server_app.terminate();
 

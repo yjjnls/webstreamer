@@ -13,7 +13,7 @@ let WS   = webstreamer,
 
 const tesseract = require('node-tesseract');
 const Promise = require('bluebird');
-const uuid = require('node-uuid');
+const uuid = require('uuid');
 const fs = require('fs');
 
 function ocr ( filename ){
