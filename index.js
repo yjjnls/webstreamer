@@ -105,6 +105,15 @@ class LiveStream extends _LiveStream {
     }
 }
 
+const _MultiPoints = require('./lib/multipoints').MultiPoints;
+class MultiPoints extends _MultiPoints {
+    constructor(name) {
+        super(webstreamer_, name);
+        webstreamer_.apps_[`${this.name}@${this.type}`] = this;
+
+    }
+}
+
 const utils = require('./lib/utils');
 module.exports = {
     option: default_option,
@@ -120,6 +129,7 @@ module.exports = {
     GStreamerVideoTestSrcAnalyzer: GStreamerVideoTestSrcAnalyzer,
     GStreamerAudioTestSrcAnalyzer: GStreamerAudioTestSrcAnalyzer,
     LiveStream: LiveStream,
+    MultiPoints: MultiPoints,
     WebRTCAnalyzer: WebRTCAnalyzer,
     tesseract: tesseract
 
